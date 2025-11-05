@@ -7,7 +7,7 @@ pygame.init()
 
 screen = pygame.display.set_mode((1600,1200))
 pygame.display.set_caption("UT-Fight")
-pygame_icon = pygame.image.load(r'resources\soul.jpeg')
+pygame_icon = pygame.image.load(r'resources\soul.png')
 pygame.display.set_icon(pygame_icon)
 
 

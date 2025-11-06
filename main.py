@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+from classes import *
 from pygame import mixer
 
 pygame.init()

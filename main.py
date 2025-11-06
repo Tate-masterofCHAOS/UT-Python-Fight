@@ -12,26 +12,59 @@ pygame_icon = pygame.image.load(r'resources\soul.png')
 pygame.display.set_icon(pygame_icon)
 
 player = Player(800-32, 600-32)
-battle_box = pygame.Rect(300, 200, 1000, 800)
+battle_box = pygame.Rect(300, 600, 1000, 400)
+Fight_btn = pygame.image.load(r'resources\Fight_btn.png')   
+fight = Button(310, 1050, Fight_btn, .305)
+Act_btn = pygame.image.load(r'resources\Act_btn.png')   
+act = Button(560, 1050, Act_btn, .42)
+Item_btn = pygame.image.load(r'resources\Item_btn.png')   
+item = Button(810, 1050, Item_btn, .42)
+mercy_btn = pygame.image.load(r'resources\Mercy_btn.png')   
+mercy = Button(1060, 1050, mercy_btn  , .42)
+WHITE = (255, 255, 255)
+move_area = pygame.Rect(300+10, 600+10, 1000-20, 400-20)
+
+speed = 4
 
 def main():
     running = True
     while running:
         screen.fill((0,0,0))
+        pygame.draw.rect(screen, WHITE, battle_box, 10)
         #Loops
         for event in pygame.event.get():
             keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
                 running = False
 
+
+
+        keys = pygame.key.get_pressed()
+        # reset velocities each frame
+        player.changex = 0
+        player.changey = 0
+        if keys[pygame.K_LEFT]:
+            player.changex = -speed
+        elif keys[pygame.K_RIGHT]:
+            player.changex = speed
+        if keys[pygame.K_UP]:
+            player.changey = -speed
+        elif keys[pygame.K_DOWN]:
+            player.changey = speed
+
+        player.update(move_area)
         player.player_set()
-        screen.blit(pygame.Surface(battle_box.size), battle_box.topleft)
+        fight.draw()
+        act.draw()
+        item.draw()
+        mercy.draw()
+        pygame.display.flip()
+        
+        
+        
 
         
-        player.update(keys, battle_box.get_rect())
-
-        
-        pygame.display.flip
+        pygame.display.flip()
 
 main()
 

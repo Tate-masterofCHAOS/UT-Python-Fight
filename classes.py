@@ -1,5 +1,6 @@
 
 import pygame
+from pygame import mixer
 
 pygame.init()
 
@@ -8,6 +9,8 @@ pygame.display.set_caption("UT-Fight")
 pygame_icon = pygame.image.load(r'resources\soul.png')
 pygame.display.set_icon(pygame_icon)
 
+def select_sound():
+    pygame.mixer.Sound(r'resources\select.wav').play()
 
 class Bullet:
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):

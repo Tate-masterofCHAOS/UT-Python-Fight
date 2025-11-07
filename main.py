@@ -3,6 +3,7 @@ import random
 import math
 from classes import *
 from pygame import mixer
+from Basic_functions import *
 
 pygame.init()
 
@@ -19,26 +20,42 @@ battle_box_height = 400
 battle_box = pygame.Rect(300, 600, 1000, 400)
 
 Fight_btn = pygame.image.load(r'resources\Fight_btn.png')   
-fight = Button(310, 1050, Fight_btn, .305)
+fight = Button(320, 1070, Fight_btn, .305)
 Act_btn = pygame.image.load(r'resources\Act_btn.png')   
-act = Button(560, 1050, Act_btn, .42)
+act = Button(570, 1070, Act_btn, .42)
 Item_btn = pygame.image.load(r'resources\Item_btn.png')   
-item = Button(810, 1050, Item_btn, .42)
+item = Button(820, 1070, Item_btn, .42)
 mercy_btn = pygame.image.load(r'resources\Mercy_btn.png')   
-mercy = Button(1060, 1050, mercy_btn  , .42)
+mercy = Button(1070, 1070, mercy_btn  , .42)
 WHITE = (255, 255, 255)
 move_area = pygame.Rect(battle_box_x+10, battle_box_y+10, battle_box_width-20, battle_box_height-20)
+
+hp_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 50)
+
+
+
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
 
 attack1 = Attack_type_A(10)
 
 SPEED = 1
 
+play_bgm_battle()
 
 def main():
     running = True
+    
     while running:
         screen.fill((0,0,0))
         pygame.draw.rect(screen, WHITE, battle_box, 10)
+        max_hp_bar = pygame.Rect(700, 1015, player.max_health * 2, 40)
+        current_hp_bar = pygame.Rect(700, 1015, player.health * 2, 40)
+        pygame.draw.rect(screen, RED, max_hp_bar)
+        pygame.draw.rect(screen, YELLOW, current_hp_bar)
+
+        hp_display = hp_font.render(f"{player.health}/{player.max_health}", True, (255, 255, 255))
+        screen.blit(hp_display, (900, 1008))
         # event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -64,6 +81,7 @@ def main():
         player.update(move_area)
         player.player_set()
 
+        attack1.update()
         # update and draw bullets from attacks (non-blocking)
         update_bullets(move_area, player)
 

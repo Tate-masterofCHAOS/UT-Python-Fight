@@ -43,7 +43,7 @@ class Bullet_type_A(Bullet):
         self.frame = self.frame1
         self.transformed = pygame.transform.scale(self.frame, self.scale)
         self.x_pos = random.randint(300, 1300) if x_pos == 0 else x_pos
-        self.y_pos = random.randint(100, 500) if y_pos == 0 else y_pos
+        self.y_pos = 400 if y_pos == 0 else y_pos
         self.x_change = x_change
         self.y_change = y_change if y_change != 0 else 5
         self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
@@ -73,6 +73,46 @@ class Bullet_type_A(Bullet):
             return True
         return False
         
+class Bullet_type_B(Bullet):
+    def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
+        super().__init__(sprite, scale, x_pos, y_pos, x_change, y_change)
+        self.frame1 = pygame.image.load(r'resources/attack_1_frame_1.png').convert_alpha()
+        self.frame1 = pygame.transform.rotate(self.frame1, 90)
+        self.frame2 = pygame.image.load(r'resources/attack_1_frame_2.png').convert_alpha()
+        self.frame2 = pygame.transform.rotate(self.frame2, 90)
+        self.scale = scale
+        self.frame = self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+        self.x_pos = 200 if x_pos == 0 else x_pos
+        self.y_pos = random.randint(600, 1000) if y_pos == 0 else y_pos
+        self.x_change = x_change if x_change != 0 else 5
+        self.y_change = y_change 
+        self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
+        self._anim_toggle = False
+
+    def move(self):
+        self.x_pos += self.x_change
+        self.y_pos += self.y_change
+        self.rect.topleft = (int(self.x_pos), int(self.y_pos))
+        # toggle animation each frame (no sleep)
+        self._anim_toggle = not self._anim_toggle
+        self.frame = self.frame2 if self._anim_toggle else self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+
+    def create(self):
+        screen.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+             surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+            surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+
+    def hit(self, player):
+        if self.rect.colliderect(player.rect):
+            player.health -= random.randint(1, 10)
+            return True
+        return False
 
 
 #Parent class for attacks
@@ -85,15 +125,35 @@ class Attack:
 
 #Child class for a specific type of attack
 class Attack_type_A(Attack):
-    def __init__(self, length):
+    def __init__(self, length, spawn_interval=0.1):
         super().__init__(length)
         self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
 
     def perform_attack(self):
-        for _ in range(random.randint(1, 10)):
-            b = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
-            active_bullets.append(b)
-        # return immediately (no sleeps or loops)
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            self.last_spawn = now
 
 # update/draw bullets each frame; call from main loop
 def update_bullets(boundary_rect, player):

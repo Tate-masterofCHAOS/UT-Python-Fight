@@ -31,50 +31,52 @@ move_area = pygame.Rect(battle_box_x+10, battle_box_y+10, battle_box_width-20, b
 
 attack1 = Attack_type_A(10)
 
-speed = 4
+SPEED = 1
+
 
 def main():
     running = True
     while running:
         screen.fill((0,0,0))
         pygame.draw.rect(screen, WHITE, battle_box, 10)
-        #Loops
+        # event loop
         for event in pygame.event.get():
-            keys = pygame.key.get_pressed()
             if event.type == pygame.QUIT:
                 running = False
-
-
+            # spawn attack on keydown so perform_attack isn't called every frame
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_a:
+                    attack1.perform_attack()
 
         keys = pygame.key.get_pressed()
         # reset velocities each frame
         player.changex = 0
         player.changey = 0
         if keys[pygame.K_LEFT]:
-            player.changex = -speed
+            player.changex = -SPEED
         elif keys[pygame.K_RIGHT]:
-            player.changex = speed
+            player.changex = SPEED
         if keys[pygame.K_UP]:
-            player.changey = -speed
+            player.changey = -SPEED
         elif keys[pygame.K_DOWN]:
-            player.changey = speed
-        if keys[pygame.K_1]:
-            attack1.perform_attack()
-
+            player.changey = SPEED
 
         player.update(move_area)
         player.player_set()
+
+        # update and draw bullets from attacks (non-blocking)
+        update_bullets(move_area, player)
+
         fight.draw()
         act.draw()
         item.draw()
         mercy.draw()
+
         pygame.display.flip()
         
         
         
 
-        
-        pygame.display.flip()
 
 main()
 

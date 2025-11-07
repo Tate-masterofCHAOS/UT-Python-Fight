@@ -5,7 +5,7 @@ import random
 import time
 
 pygame.init()
-
+ 
 screen = pygame.display.set_mode((1600,1200))
 pygame.display.set_caption("UT-Fight")
 pygame_icon = pygame.image.load(r'resources\soul.png')
@@ -30,34 +30,48 @@ class Bullet:
     def hit(self):
         pass
 
+
 #Child class for a specific type of bullet
+active_bullets = []
+
 class Bullet_type_A(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
         super().__init__(sprite, scale, x_pos, y_pos, x_change, y_change)
-        self.sprite = pygame.image.load(r'resources/attack_1_frame_1.png')
-        self.transformed_sprite = pygame.transform.scale(sprite, scale)
-        self.x_pos = random.randint(300, 1300)
-        self.y_pos = random.srandint(100, 500)
-        self.x_change = 0
-        self.y_change = 5
-        self.rect = self.sprite.get_rect(topleft=(self.x_pos, self.y_pos))
+        self.frame1 = pygame.image.load(r'resources/attack_1_frame_1.png').convert_alpha()
+        self.frame2 = pygame.image.load(r'resources/attack_1_frame_2.png').convert_alpha()
+        self.scale = scale
+        self.frame = self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+        self.x_pos = random.randint(300, 1300) if x_pos == 0 else x_pos
+        self.y_pos = random.randint(100, 500) if y_pos == 0 else y_pos
+        self.x_change = x_change
+        self.y_change = y_change if y_change != 0 else 5
+        self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
+        self._anim_toggle = False
 
     def move(self):
         self.x_pos += self.x_change
         self.y_pos += self.y_change
-        if self.sprite == pygame.image.load(r'resources/attack_1_frame_1.png'):
-            time.sleep(0.5)
-            self.sprite = pygame.image.load(r'resources/attack_1_frame_2.png')
-        else:
-            time.sleep(0.5)
-            self.sprite = pygame.image.load(r'resources/attack_1_frame_1.png')
-    
+        self.rect.topleft = (int(self.x_pos), int(self.y_pos))
+        # toggle animation each frame (no sleep)
+        self._anim_toggle = not self._anim_toggle
+        self.frame = self.frame2 if self._anim_toggle else self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+
     def create(self):
-        screen.blit(self.sprite, (self.x_pos, self.y_pos))
-    
+        screen.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+             surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+            surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+
     def hit(self, player):
-        if self.rect.colliderect(player.rect, self.x_pos, self.y_pos, self.sprite.get_width(), self.sprite.get_height()):
-            player.health -= random.randint(1, 10)  # Decrease player's health by 1 through ten on hit
+        if self.rect.colliderect(player.rect):
+            player.health -= random.randint(1, 10)
+            return True
+        return False
         
 
 
@@ -76,14 +90,38 @@ class Attack_type_A(Attack):
         self.length = length
 
     def perform_attack(self):
-        start_time = time.time()
-        while time.time() - start_time < self.length:
-            # Logic for performing the attack
-            for i in range(random.randint(1, 10)):
-                bullet = Bullet_type_A(None, (50, 50), 0, 0, 0, 0)
-                bullet.move()
-                bullet.create()
-                time.sleep(.3)  # Simulate time between bullet spawns
+        for _ in range(random.randint(1, 10)):
+            b = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(b)
+        # return immediately (no sleeps or loops)
+
+# update/draw bullets each frame; call from main loop
+def update_bullets(boundary_rect, player):
+    # get the current display/screen rect so we only remove bullets that left the screen
+    surf = pygame.display.get_surface()
+    if surf:
+        screen_rect = surf.get_rect()
+    else:
+        # fallback: large rect covering expected window size
+        screen_rect = pygame.Rect(0, 0, 1600, 1200)
+
+    for b in active_bullets[:]:
+        b.move()
+        # remove bullets that have left the screen entirely
+        if not screen_rect.colliderect(b.rect):
+            try:
+                active_bullets.remove(b)
+            except ValueError:
+                pass
+            continue
+
+        # draw and check collision against the player (still use boundary_rect if desired for hits)
+        b.create()
+        if b.hit(player):
+            try:
+                active_bullets.remove(b)
+            except ValueError:
+                pass
         
 
 #Parent class for enemies
@@ -117,7 +155,10 @@ class Player_soul:
             self.x, self.y = self.rect.topleft
 
     def player_set(self):
-        screen.blit(self.img, (self.x, self.y))
+         screen.blit(self.img, (self.x, self.y))
+         surf = pygame.display.get_surface()
+         if surf:
+             surf.blit(self.img, (int(self.x), int(self.y)))
 
 #Class for buttons
 class Button:

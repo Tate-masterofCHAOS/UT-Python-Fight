@@ -84,20 +84,18 @@ class Bullet_type_B(Bullet):
         self.frame = self.frame1
         self.transformed = pygame.transform.scale(self.frame, self.scale)
         self.x_pos = 200 if x_pos == 0 else x_pos
-        self.y_pos = random.randint(600, 1000) if y_pos == 0 else y_pos
+        self.y_pos = 600 if y_pos == 0 else y_pos
+        self.y_pos2 = 900 if y_pos == 0 else y_pos
         self.x_change = x_change if x_change != 0 else 5
         self.y_change = y_change 
         self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
-        self._anim_toggle = False
+
 
     def move(self):
         self.x_pos += self.x_change
         self.y_pos += self.y_change
         self.rect.topleft = (int(self.x_pos), int(self.y_pos))
         # toggle animation each frame (no sleep)
-        self._anim_toggle = not self._anim_toggle
-        self.frame = self.frame2 if self._anim_toggle else self.frame1
-        self.transformed = pygame.transform.scale(self.frame, self.scale)
 
     def create(self):
         screen.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
@@ -153,6 +151,39 @@ class Attack_type_A(Attack):
         if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
             a = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
             active_bullets.append(a)
+            self.last_spawn = now
+
+class Attack_type_B(Attack):
+    def __init__(self, length, spawn_interval=0.001):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 200, 0, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 900, 0, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
             self.last_spawn = now
 
 # update/draw bullets each frame; call from main loop

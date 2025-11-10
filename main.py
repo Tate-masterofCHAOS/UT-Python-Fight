@@ -38,10 +38,13 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 
 attack1 = Attack_type_A(10)
+attack2 = Attack_type_B(10)
+attack3 = Attack_type_C(10)
+attack4 = Attack_type_D(10)
 
 SPEED = 1
 
-play_bgm_battle()
+no_stopping = False
 
 def main():
     running = True
@@ -62,26 +65,38 @@ def main():
                 running = False
             # spawn attack on keydown so perform_attack isn't called every frame
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_a:
+                if event.key == pygame.K_1:
                     attack1.perform_attack()
+                if event.key == pygame.K_2:
+                    attack2.perform_attack()
+                if event.key == pygame.K_3:
+                    attack3.perform_attack()
+                if event.key == pygame.K_4:
+                    attack4.perform_attack()
 
         keys = pygame.key.get_pressed()
         # reset velocities each frame
         player.changex = 0
         player.changey = 0
-        if keys[pygame.K_LEFT]:
-            player.changex = -SPEED
-        elif keys[pygame.K_RIGHT]:
-            player.changex = SPEED
-        if keys[pygame.K_UP]:
-            player.changey = -SPEED
-        elif keys[pygame.K_DOWN]:
-            player.changey = SPEED
+        if no_stopping == False:
+            if keys[pygame.K_LEFT]:
+                player.changex = -SPEED
+            elif keys[pygame.K_RIGHT]:
+                player.changex = SPEED
+            if keys[pygame.K_UP]:
+                player.changey = -SPEED
+            elif keys[pygame.K_DOWN]:
+                player.changey += SPEED
+            
+            
 
         player.update(move_area)
         player.player_set()
 
         attack1.update()
+        attack2.update()
+        attack3.update()
+        attack4.update()
         # update and draw bullets from attacks (non-blocking)
         update_bullets(move_area, player)
 

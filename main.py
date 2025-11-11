@@ -9,10 +9,10 @@ pygame.init()
 
 screen = pygame.display.set_mode((1600,1200))
 pygame.display.set_caption("UT-Fight")
-pygame_icon = pygame.image.load(r'resources\soul.png')
+pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
 
-player = Player_soul()
+player = Player_soul("Red")
 battle_box_x = 300
 battle_box_y = 600
 battle_box_width = 1000
@@ -30,7 +30,8 @@ mercy = Button(1070, 1070, mercy_btn  , .42)
 WHITE = (255, 255, 255)
 move_area = pygame.Rect(battle_box_x+10, battle_box_y+10, battle_box_width-20, battle_box_height-20)
 
-hp_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 50)
+game_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 50)
+game_over_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
 
 
 
@@ -43,12 +44,12 @@ attack3 = Attack_type_C(10)
 attack4 = Attack_type_D(10)
 
 SPEED = 1
-
-no_stopping = False
+direction = 'down'
 
 def main():
+    global direction
     running = True
-    
+
     while running:
         screen.fill((0,0,0))
         pygame.draw.rect(screen, WHITE, battle_box, 10)
@@ -57,7 +58,7 @@ def main():
         pygame.draw.rect(screen, RED, max_hp_bar)
         pygame.draw.rect(screen, YELLOW, current_hp_bar)
 
-        hp_display = hp_font.render(f"{player.health}/{player.max_health}", True, (255, 255, 255))
+        hp_display = game_font.render(f"{player.health}/{player.max_health}", True, (255, 255, 255))
         screen.blit(hp_display, (900, 1008))
         # event loop
         for event in pygame.event.get():
@@ -73,20 +74,55 @@ def main():
                     attack3.perform_attack()
                 if event.key == pygame.K_4:
                     attack4.perform_attack()
+                if event.key == pygame.K_SPACE:
+                    player.soul_mode = "Orange" if player.soul_mode == "Red" else "Red"
 
         keys = pygame.key.get_pressed()
         # reset velocities each frame
         player.changex = 0
         player.changey = 0
-        if no_stopping == False:
+
+        if player.soul_mode == "Red":
             if keys[pygame.K_LEFT]:
                 player.changex = -SPEED
+                direction = 'left'
             elif keys[pygame.K_RIGHT]:
                 player.changex = SPEED
+                direction = 'right'
             if keys[pygame.K_UP]:
                 player.changey = -SPEED
+                direction = 'up'
             elif keys[pygame.K_DOWN]:
-                player.changey += SPEED
+                player.changey = SPEED
+                direction = 'down'
+
+        elif player.soul_mode == "Orange":
+            # continue moving in last direction unless a new key is pressed
+            # set exactly one axis based on direction and clear the other axis
+            if direction == 'left':
+                player.changex = -SPEED
+            elif direction == 'right':
+                player.changex = SPEED
+            elif direction == 'up':
+                player.changey = -SPEED
+            elif direction == 'down':
+                player.changey = SPEED
+
+            # update direction if the player presses a key (changes movement next frame)
+            if keys[pygame.K_LEFT]:
+                direction = 'left'
+            elif keys[pygame.K_RIGHT]:
+                direction = 'right'
+            if keys[pygame.K_UP]:
+                direction = 'up'
+            elif keys[pygame.K_DOWN]:
+                direction = 'down'
+
+        # normalize diagonal movement so total speed stays constant
+        if player.changex != 0 and player.changey != 0:
+            inv = 1.0 / math.sqrt(2)
+            player.changex *= inv
+            player.changey *= inv
             
             
 
@@ -105,21 +141,63 @@ def main():
         item.draw()
         mercy.draw()
 
+        if player.health <= 0:
+            screen.fill((0,0,0))
+            game_over_display = game_over_font.render("GAME OVER", True, (255, 0, 0))
+            screen.blit(game_over_display, (500, 200))
+            game_over_display2 = game_over_font.render("""Press ESC to Exit
+                                                        or Enter to restart""", True, (255, 255, 255))
+            screen.blit(game_over_display2, (400, 400))
+            if keys[pygame.K_ESCAPE]:
+                running = False
+            if keys[pygame.K_RETURN]:
+                player.health = player.max_health
+                direction = 'down'
         pygame.display.flip()
-        
+    
+    pygame.quit()
         
         
 
 
 main()
 
+"""
+Red
+1
+2
+3
+4
+12
+13
+14
+23
+24
+34
+123
+124
+134
+234
+1234
+total: 15
+"""
 
-
-
-
-
-
-
-
-
-
+"""
+Orange
+1
+2
+3
+4
+12
+13
+14
+23
+24
+34
+123
+124
+134
+234
+1234
+total: 15
+"""

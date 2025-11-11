@@ -6,7 +6,7 @@ pygame.init()
 
 screen = pygame.display.set_mode((1600,1200))
 pygame.display.set_caption("UT-Fight")
-pygame_icon = pygame.image.load(r'resources\soul.png')
+pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
 
 #Plays background music for battle scenes

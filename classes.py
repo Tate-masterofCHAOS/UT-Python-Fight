@@ -9,7 +9,7 @@ pygame.init()
  
 screen = pygame.display.set_mode((1600,1200))
 pygame.display.set_caption("UT-Fight")
-pygame_icon = pygame.image.load(r'resources\soul.png')
+pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
 
 #Parent class for bullet(projectiles)
@@ -270,7 +270,7 @@ class Attack_type_A(Attack):
             self.last_spawn = now
 
 class Attack_type_B(Attack):
-    def __init__(self, length, spawn_interval=0.25):
+    def __init__(self, length, spawn_interval=0.5):
         super().__init__(length)
         self.length = length
         self.spawn_interval = spawn_interval  # seconds between spawns
@@ -334,7 +334,7 @@ class Attack_type_C(Attack):
             self.last_spawn = now
         
 class Attack_type_D(Attack):
-    def __init__(self, length, spawn_interval=0.25):
+    def __init__(self, length, spawn_interval=0.5):
         super().__init__(length)
         self.length = length
         self.spawn_interval = spawn_interval  # seconds between spawns
@@ -406,10 +406,25 @@ class Enemy:
         self.attacks = []
 
 #Class for the player, specifically the soul that appears during fights
+try:
+    _soul_red = pygame.image.load(r'resources\soul_red.png').convert_alpha()
+    _soul_orange = pygame.image.load(r'resources\soul_orange.png').convert_alpha()
+except Exception:
+    # fallback surfaces if assets missing (keeps code robust)
+    _soul_red = pygame.Surface((64, 64), pygame.SRCALPHA)
+    _soul_orange = pygame.Surface((64, 64), pygame.SRCALPHA)
+
+SOUL_IMAGES = {
+    "Red": pygame.transform.scale(_soul_red, (64, 64)),
+    "Orange": pygame.transform.scale(_soul_orange, (64, 64)),
+}
+# ...existing code...
 class Player_soul:
-    def __init__(self, x=800-32, y=600-32, changex=0, changey=0):
-        img = pygame.image.load(r'resources/soul.png')
-        self.img = pygame.transform.scale(img, (64, 64))  # Scale the image to fit the screen 
+    def __init__(self, soul_mode, x=800-32, y=600-32, changex=0, changey=0):
+        # use preloaded images instead of loading every frame
+        self.soul_mode = soul_mode
+        self.img = SOUL_IMAGES.get(self.soul_mode, SOUL_IMAGES["Red"])
+        self.current_mode = self.soul_mode  # remember which image is active
         self.x = x
         self.y = y
         self.changex = changex
@@ -428,11 +443,17 @@ class Player_soul:
             # ensure position variables match the clamped rect
             self.x, self.y = self.rect.topleft
 
+            # only swap the image if the mode actually changed
+            if self.soul_mode != self.current_mode:
+                self.img = SOUL_IMAGES.get(self.soul_mode, SOUL_IMAGES["Red"])
+                self.current_mode = self.soul_mode
+
     def player_set(self):
          screen.blit(self.img, (self.x, self.y))
          surf = pygame.display.get_surface()
          if surf:
              surf.blit(self.img, (int(self.x), int(self.y)))
+        
 
 #Class for buttons
 class Button:

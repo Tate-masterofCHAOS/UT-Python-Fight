@@ -37,18 +37,23 @@ game_over_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 
 
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
+PURPLE = (156, 0, 156)
 
-attack1 = Attack_type_A(10)
-attack2 = Attack_type_B(10)
-attack3 = Attack_type_C(10)
-attack4 = Attack_type_D(10)
+
 
 SPEED = 1
 direction = 'down'
 
+
 def main():
     global direction
     running = True
+    player.health = player.max_health
+    direction = 'down'
+    attack1 = Attack_type_A(10)
+    attack2 = Attack_type_B(10)
+    attack3 = Attack_type_C(10)
+    attack4 = Attack_type_D(10)
 
     while running:
         screen.fill((0,0,0))
@@ -75,12 +80,24 @@ def main():
                 if event.key == pygame.K_4:
                     attack4.perform_attack()
                 if event.key == pygame.K_SPACE:
-                    player.soul_mode = "Orange" if player.soul_mode == "Red" else "Red"
+                    if player.soul_mode == "Red":
+                        player.soul_mode = "Orange"
+                        player.player_set()
+                    elif player.soul_mode == "Orange":
+                        player.soul_mode = "Blue"
+                        player.player_set()
+                    elif player.soul_mode == "Blue":
+                        player.soul_mode = "Purple"
+                        player.player_set()
+                    elif player.soul_mode == "Purple":
+                        player.soul_mode = "Red"
+                        player.player_set()
 
         keys = pygame.key.get_pressed()
         # reset velocities each frame
         player.changex = 0
-        player.changey = 0
+        if player.soul_mode != "Blue":
+            player.changey = 0
 
         if player.soul_mode == "Red":
             if keys[pygame.K_LEFT]:
@@ -118,6 +135,43 @@ def main():
             elif keys[pygame.K_DOWN]:
                 direction = 'down'
 
+        #Blue soul movement: Gravity effect toward bottom of battle box
+        elif player.soul_mode == "Blue":
+            if keys[pygame.K_LEFT]:
+                player.changex = -SPEED
+                direction = 'left'
+            elif keys[pygame.K_RIGHT]:
+                player.changex = SPEED
+                direction = 'right'
+            if keys[pygame.K_UP]:
+                player.changey = -SPEED
+                direction = 'up'
+            elif keys[pygame.K_DOWN]:
+                player.changey = SPEED
+                direction = 'down'
+
+        elif player.soul_mode == "Purple":
+            LineA = pygame.Rect(500, 600, 1, 400)
+            LineB = pygame.Rect(700, 600, 1, 400)
+            LineC = pygame.Rect(900, 600, 1, 400)
+            LineD = pygame.Rect(1100, 600, 1, 400)
+            pygame.draw.rect(screen, PURPLE, LineA, 10)
+            pygame.draw.rect(screen, PURPLE, LineB, 10)
+            pygame.draw.rect(screen, PURPLE, LineC, 10)
+            pygame.draw.rect(screen, PURPLE, LineD, 10)
+            if keys[pygame.K_LEFT]:
+                player.changex = -SPEED
+                direction = 'left'
+            elif keys[pygame.K_RIGHT]:
+                player.changex = SPEED
+                direction = 'right'
+            if keys[pygame.K_UP]:
+                player.changey = -SPEED
+                direction = 'up'
+            elif keys[pygame.K_DOWN]:
+                player.changey = SPEED
+                direction = 'down'
+
         # normalize diagonal movement so total speed stays constant
         if player.changex != 0 and player.changey != 0:
             inv = 1.0 / math.sqrt(2)
@@ -145,14 +199,21 @@ def main():
             screen.fill((0,0,0))
             game_over_display = game_over_font.render("GAME OVER", True, (255, 0, 0))
             screen.blit(game_over_display, (500, 200))
-            game_over_display2 = game_over_font.render("""Press ESC to Exit
-                                                        or Enter to restart""", True, (255, 255, 255))
-            screen.blit(game_over_display2, (400, 400))
+            game_font_display2 = game_font.render("You have been defeated...Stay Determined", True, (255, 255, 255))
+            screen.blit(game_font_display2, (100, 400))
+            pygame.display.flip()
             if keys[pygame.K_ESCAPE]:
                 running = False
             if keys[pygame.K_RETURN]:
+                #delete everything and reset
+                attack1 = Attack_type_A(0)
+                attack2 = Attack_type_B(0)
+                attack3 = Attack_type_C(0)
+                attack4 = Attack_type_D(0)
                 player.health = player.max_health
-                direction = 'down'
+                
+                
+                
         pygame.display.flip()
     
     pygame.quit()

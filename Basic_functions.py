@@ -17,3 +17,4 @@ def play_bgm_battle():
 #Plays sound effect for selection actions
 def select_sound():
     pygame.mixer.Sound(r'resources\select.wav').play()
+

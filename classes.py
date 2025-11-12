@@ -73,6 +73,8 @@ class Bullet_type_A(Bullet):
             player.health -= random.randint(1, 10)
             return True
         return False
+    def clear(self):
+        self.active_bullets.clear()
         
 class Bullet_type_B(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
@@ -117,6 +119,8 @@ class Bullet_type_B(Bullet):
             player.health -= random.randint(1, 10)
             return True
         return False
+    def clear(self):
+        self.active_bullets.clear()
     
 class Bullet_type_C(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change, delay=0.5, speed=6):
@@ -184,6 +188,8 @@ class Bullet_type_C(Bullet):
             player.health -= random.randint(1, 10)
             return True
         return False
+    def clear(self):
+        self.active_bullets.clear()
 
 class Bullet_type_D(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
@@ -228,6 +234,8 @@ class Bullet_type_D(Bullet):
             player.health -= random.randint(1, 10)
             return True
         return False
+    def clear(self):
+        self.active_bullets.clear()
 
 #Parent class for attacks
 class Attack:
@@ -332,6 +340,7 @@ class Attack_type_C(Attack):
             a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
             active_bullets.append(a)
             self.last_spawn = now
+
         
 class Attack_type_D(Attack):
     def __init__(self, length, spawn_interval=0.5):
@@ -409,14 +418,19 @@ class Enemy:
 try:
     _soul_red = pygame.image.load(r'resources\soul_red.png').convert_alpha()
     _soul_orange = pygame.image.load(r'resources\soul_orange.png').convert_alpha()
+    _soul_blue = pygame.image.load(r'resources\soul_blue.webp').convert_alpha()
+    _soul_purple = pygame.image.load(r'resources\soul_purple.png').convert_alpha()
 except Exception:
     # fallback surfaces if assets missing (keeps code robust)
     _soul_red = pygame.Surface((64, 64), pygame.SRCALPHA)
     _soul_orange = pygame.Surface((64, 64), pygame.SRCALPHA)
+    _soul_blue = pygame.Surface((64, 64), pygame.SRCALPHA)
 
 SOUL_IMAGES = {
     "Red": pygame.transform.scale(_soul_red, (64, 64)),
     "Orange": pygame.transform.scale(_soul_orange, (64, 64)),
+    "Blue": pygame.transform.scale(_soul_blue, (64, 64)),
+    "Purple": pygame.transform.scale(_soul_purple, (64, 64)),
 }
 # ...existing code...
 class Player_soul:

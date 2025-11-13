@@ -151,14 +151,6 @@ def main():
                 direction = 'down'
 
         elif player.soul_mode == "Purple":
-            LineA = pygame.Rect(500, 600, 1, 400)
-            LineB = pygame.Rect(700, 600, 1, 400)
-            LineC = pygame.Rect(900, 600, 1, 400)
-            LineD = pygame.Rect(1100, 600, 1, 400)
-            pygame.draw.rect(screen, PURPLE, LineA, 10)
-            pygame.draw.rect(screen, PURPLE, LineB, 10)
-            pygame.draw.rect(screen, PURPLE, LineC, 10)
-            pygame.draw.rect(screen, PURPLE, LineD, 10)
             if keys[pygame.K_LEFT]:
                 player.changex = -SPEED
                 direction = 'left'

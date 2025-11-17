@@ -75,6 +75,8 @@ class Bullet_type_A(Bullet):
         return False
     def clear(self):
         self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
         
 class Bullet_type_B(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
@@ -121,6 +123,8 @@ class Bullet_type_B(Bullet):
         return False
     def clear(self):
         self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
     
 class Bullet_type_C(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change, delay=0.5, speed=6):
@@ -190,6 +194,8 @@ class Bullet_type_C(Bullet):
         return False
     def clear(self):
         self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
 
 class Bullet_type_D(Bullet):
     def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
@@ -236,6 +242,8 @@ class Bullet_type_D(Bullet):
         return False
     def clear(self):
         self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
 
 #Parent class for attacks
 class Attack:
@@ -244,6 +252,8 @@ class Attack:
 
     def perform_attack(self):
         pass
+
+    
 
 #Child class for a specific type of attack
 class Attack_type_A(Attack):
@@ -277,6 +287,19 @@ class Attack_type_A(Attack):
             active_bullets.append(a)
             self.last_spawn = now
 
+        
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+
 class Attack_type_B(Attack):
     def __init__(self, length, spawn_interval=0.5):
         super().__init__(length)
@@ -309,6 +332,17 @@ class Attack_type_B(Attack):
             active_bullets.append(a)
             active_bullets.append(b)
             self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
 
 class Attack_type_C(Attack):
     def __init__(self, length, spawn_interval=0.5):
@@ -340,6 +374,17 @@ class Attack_type_C(Attack):
             a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
             active_bullets.append(a)
             self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
 
         
 class Attack_type_D(Attack):
@@ -374,6 +419,19 @@ class Attack_type_D(Attack):
             active_bullets.append(a)
             active_bullets.append(b)
             self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+
 
 # update/draw bullets each frame; call from main loop
 def update_bullets(boundary_rect, player):

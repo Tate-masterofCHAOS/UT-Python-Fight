@@ -32,6 +32,8 @@ move_area = pygame.Rect(battle_box_x+10, battle_box_y+10, battle_box_width-20, b
 
 game_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 50)
 game_over_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
+enemy_image = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
+enemy_image = pygame.transform.scale(enemy_image, (350,350))
 
 
 
@@ -49,6 +51,7 @@ def main():
     global direction
     running = True
     player.health = player.max_health
+    player_turn = True
     direction = 'down'
     attack1 = Attack_type_A(10)
     attack2 = Attack_type_B(10)
@@ -65,6 +68,7 @@ def main():
 
         hp_display = game_font.render(f"{player.health}/{player.max_health}", True, (255, 255, 255))
         screen.blit(hp_display, (900, 1008))
+        screen.blit(enemy_image, (600, 200))
         # event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -101,16 +105,16 @@ def main():
 
         if player.soul_mode == "Red":
             if keys[pygame.K_LEFT]:
-                player.changex = -SPEED
+                player.changex = -SPEED * 1.5
                 direction = 'left'
             elif keys[pygame.K_RIGHT]:
-                player.changex = SPEED
+                player.changex = SPEED * 1.5
                 direction = 'right'
             if keys[pygame.K_UP]:
-                player.changey = -SPEED
+                player.changey = -SPEED * 1.5
                 direction = 'up'
             elif keys[pygame.K_DOWN]:
-                player.changey = SPEED
+                player.changey = SPEED * 1.5
                 direction = 'down'
 
         elif player.soul_mode == "Orange":
@@ -163,15 +167,19 @@ def main():
             elif keys[pygame.K_DOWN]:
                 player.changey = SPEED
                 direction = 'down'
-
-        # normalize diagonal movement so total speed stays constant
-        if player.changex != 0 and player.changey != 0:
-            inv = 1.0 / math.sqrt(2)
-            player.changex *= inv
-            player.changey *= inv
             
-            
-
+        if attack1.is_ended():
+            attack2.perform_attack()
+        elif attack2.is_ended():
+            attack3.perform_attack()
+        elif attack3.is_ended():
+            attack3.perform_attack()
+        elif attack3.is_ended():
+            attack4.perform_attack()
+        elif attack4.is_ended():
+            attack1.perform_attack()
+        else:
+            attack1.perform_attack()
         player.update(move_area)
         player.player_set()
 
@@ -198,10 +206,10 @@ def main():
                 running = False
             if keys[pygame.K_RETURN]:
                 #delete everything and reset
-                attack1 = Attack_type_A(0)
-                attack2 = Attack_type_B(0)
-                attack3 = Attack_type_C(0)
-                attack4 = Attack_type_D(0)
+                attack1.clear()
+                attack2.clear()
+                attack3.clear()
+                attack4.clear()
                 player.health = player.max_health
                 
                 

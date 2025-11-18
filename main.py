@@ -57,7 +57,12 @@ def main():
     attack2 = Attack_type_B(10)
     attack3 = Attack_type_C(10)
     attack4 = Attack_type_D(10)
+    attack5 = Attack_type_E(10)
+    attacks = [attack1, attack2, attack3, attack4]
+    started = {"attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False}
+    current_attack = "attack1"
 
+    
     while running:
         screen.fill((0,0,0))
         pygame.draw.rect(screen, WHITE, battle_box, 10)
@@ -69,20 +74,13 @@ def main():
         hp_display = game_font.render(f"{player.health}/{player.max_health}", True, (255, 255, 255))
         screen.blit(hp_display, (900, 1008))
         screen.blit(enemy_image, (600, 200))
+        
         # event loop
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             # spawn attack on keydown so perform_attack isn't called every frame
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    attack1.perform_attack()
-                if event.key == pygame.K_2:
-                    attack2.perform_attack()
-                if event.key == pygame.K_3:
-                    attack3.perform_attack()
-                if event.key == pygame.K_4:
-                    attack4.perform_attack()
                 if event.key == pygame.K_SPACE:
                     if player.soul_mode == "Red":
                         player.soul_mode = "Orange"
@@ -168,27 +166,59 @@ def main():
                 player.changey = SPEED
                 direction = 'down'
             
-        if attack1.is_ended():
-            attack2.perform_attack()
-        elif attack2.is_ended():
-            attack3.perform_attack()
-        elif attack3.is_ended():
-            attack3.perform_attack()
-        elif attack3.is_ended():
-            attack4.perform_attack()
-        elif attack4.is_ended():
-            attack1.perform_attack()
-        else:
-            attack1.perform_attack()
+        if current_attack == "attack1":
+            if not started["attack1"]:
+                attack1.perform_attack()
+                started["attack1"] = True
+        elif current_attack == "attack2":
+            if not started["attack2"]:
+                attack2.perform_attack()
+                started["attack2"] = True
+        elif current_attack == "attack3":
+            if not started["attack3"]:
+                attack3.perform_attack()
+                started["attack3"] = True
+        elif current_attack == "attack4":
+            if not started["attack4"]:
+                attack4.perform_attack()
+                started["attack4"] = True
+        elif current_attack == "attack5":
+            if not started["attack5"]:
+                attack5.perform_attack()
+                started["attack5"] = True
+
+
         player.update(move_area)
         player.player_set()
 
-        attack1.update()
-        attack2.update()
-        attack3.update()
-        attack4.update()
+        cur = None
+        if current_attack == "attack1":
+            cur = attack1
+        elif current_attack == "attack2":
+            cur = attack2
+        elif current_attack == "attack3":
+            cur = attack3
+        elif current_attack == "attack4":
+            cur = attack4
+        elif current_attack == "attack5":
+            cur = attack5
+
+        if cur is not None:
+            finished = (cur.update() == False)
+            if finished:
+                # advance sequence
+                if current_attack == "attack1":
+                    current_attack = "attack2"
+                elif current_attack == "attack2":
+                    current_attack = "attack3"
+                elif current_attack == "attack3":
+                    current_attack = "attack4"
+                elif current_attack == "attack4":
+                    current_attack = "attack5"
+        
         # update and draw bullets from attacks (non-blocking)
         update_bullets(move_area, player)
+
 
         fight.draw()
         act.draw()

@@ -385,8 +385,7 @@ class Attack_type_C(Attack):
             return True
         else:
             return False
-
-        
+   
 class Attack_type_D(Attack):
     def __init__(self, length, spawn_interval=0.5):
         super().__init__(length)
@@ -479,7 +478,417 @@ class Attack_type_E(Attack):
         else:
             return False
         
+class Attack_type_F(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
 
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            b = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_G(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_H(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            c = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_I(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_J(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            c = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_K(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_L(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            d = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            e = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            active_bullets.append(e)
+            self.last_spawn = now
+
+class Attack_type_M(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_M(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            c = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            e = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
 
 # update/draw bullets each frame; call from main loop
 def update_bullets(boundary_rect, player):

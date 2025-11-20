@@ -928,6 +928,7 @@ class Attack_type_O(Attack):
             active_bullets.append(b)
             active_bullets.append(c)
             active_bullets.append(d)
+            active_bullets.append(e)
             self.last_spawn = now
     
     def clear(self):

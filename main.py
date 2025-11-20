@@ -32,8 +32,7 @@ move_area = pygame.Rect(battle_box_x+10, battle_box_y+10, battle_box_width-20, b
 
 game_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 50)
 game_over_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
-enemy_image = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
-enemy_image = pygame.transform.scale(enemy_image, (350,350))
+
 
 
 
@@ -49,6 +48,8 @@ direction = 'down'
 
 def main():
     global direction
+    enemy_image = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
+    enemy_image = pygame.transform.scale(enemy_image, (350,350))
     running = True
     player.health = player.max_health
     player_turn = True
@@ -63,13 +64,35 @@ def main():
     attack7 = Attack_type_G(10)
     attack8 = Attack_type_H(10)
     attack9 = Attack_type_I(10)
-    attack10 = Attack_type_J(10)
+    attack10 = Attack_type_J(1)
 
     attack11 = Attack_type_K(10)
     attack12 = Attack_type_L(10)
     attack13 = Attack_type_M(10)
+    attack14 = Attack_type_O(10)
+
+    attack15 = Attack_type_N(10)
+
+    attack16 = Attack_type_A(10)
+    attack17 = Attack_type_B(10)
+    attack18 = Attack_type_C(10)
+    attack19 = Attack_type_D(10)
+
+    attack20 = Attack_type_E(10)
+    attack21 = Attack_type_F(10)
+    attack22 = Attack_type_G(10)
+    attack23 = Attack_type_H(10)
+    attack24 = Attack_type_I(10)
+    attack25 = Attack_type_J(10)
+
+    attack26 = Attack_type_K(10)
+    attack27 = Attack_type_L(10)
+    attack28 = Attack_type_M(10)
+    attack29 = Attack_type_O(10)
+
+    attack30 = Attack_type_N(10)
     attacks = [attack1, attack2, attack3, attack4]
-    started = {"attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False}
+    started = {"attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
     current_attack = "attack1"
 
     
@@ -92,10 +115,7 @@ def main():
             # spawn attack on keydown so perform_attack isn't called every frame
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if player.soul_mode == "Red":
-                        player.soul_mode = "Orange"
-                        player.player_set()
-                    elif player.soul_mode == "Orange":
+                    if player.soul_mode == "Orange":
                         player.soul_mode = "Blue"
                         player.player_set()
                     elif player.soul_mode == "Blue":
@@ -228,6 +248,92 @@ def main():
             if not started["attack13"]:
                 attack13.perform_attack()
                 started["attack13"] = True
+        elif current_attack == "attack14":
+            if not started["attack14"]:
+                attack14.perform_attack()
+                started["attack14"] = True
+        elif current_attack == "attack15":
+            if not started["attack15"]:
+                attack15.perform_attack()
+                started["attack15"] = True
+        elif current_attack == "attack16":
+            if not started["attack16"]:
+                player.soul_mode = "Orange"
+                enemy_image = pygame.image.load(r'resources\ff644481-c0b2-40d9-84a1-d47a51d3bcf4.png')
+                enemy_image = pygame.transform.scale(enemy_image, (350,350))
+                player.health = player.max_health
+                attack16.perform_attack()
+                started["attack16"] = True
+        elif current_attack == "attack17":
+            if not started["attack17"]:
+                player.soul_mode = "Orange"
+                attack17.perform_attack()
+                started["attack17"] = True
+        elif current_attack == "attack18":
+            if not started["attack18"]:
+                player.soul_mode = "Orange"
+                attack18.perform_attack()
+                started["attack18"] = True
+        elif current_attack == "attack19":
+            if not started["attack19"]:
+                player.soul_mode = "Orange"
+                attack19.perform_attack()
+                started["attack19"] = True
+        elif current_attack == "attack20":
+            if not started["attack20"]:
+                player.soul_mode = "Orange"
+                attack20.perform_attack()
+                started["attack20"] = True
+        elif current_attack == "attack21":
+            if not started["attack21"]:
+                player.soul_mode = "Orange"
+                attack21.perform_attack()
+                started["attack21"] = True
+        elif current_attack == "attack22":
+            if not started["attack22"]:
+                player.soul_mode = "Orange"
+                attack22.perform_attack()
+                started["attack22"] = True
+        elif current_attack == "attack23":
+            if not started["attack23"]:
+                player.soul_mode = "Orange"
+                attack23.perform_attack()
+                started["attack23"] = True
+        elif current_attack == "attack24":
+            if not started["attack24"]:
+                player.soul_mode = "Orange"
+                attack24.perform_attack()
+                started["attack24"] = True
+        elif current_attack == "attack25":
+            if not started["attack25"]:
+                player.soul_mode = "Orange"
+                attack25.perform_attack()
+                started["attack25"] = True
+        elif current_attack == "attack26":
+            if not started["attack26"]:
+                player.soul_mode = "Orange"
+                attack26.perform_attack()
+                started["attack26"] = True
+        elif current_attack == "attack27":
+            if not started["attack27"]:
+                player.soul_mode = "Orange"
+                attack27.perform_attack()
+                started["attack27"] = True
+        elif current_attack == "attack28":
+            if not started["attack28"]:
+                player.soul_mode = "Orange"
+                attack28.perform_attack()
+                started["attack28"] = True
+        elif current_attack == "attack29":
+            if not started["attack29"]:
+                player.soul_mode = "Orange"
+                attack29.perform_attack()
+                started["attack29"] = True
+        elif current_attack == "attack30":
+            if not started["attack30"]:
+                player.soul_mode = "Orange"
+                attack30.perform_attack()
+                started["attack30"] = True
 
 
         player.update(move_area)
@@ -260,6 +366,40 @@ def main():
             cur = attack12
         elif current_attack == "attack13":
             cur = attack13
+        elif current_attack == "attack14":
+            cur = attack14
+        elif current_attack == "attack15":
+            cur = attack15
+        elif current_attack == "attack16":
+            cur = attack16
+        elif current_attack == "attack17":
+            cur = attack17
+        elif current_attack == "attack18":
+            cur = attack18
+        elif current_attack == "attack19":
+            cur = attack19
+        elif current_attack == "attack20":
+            cur = attack20
+        elif current_attack == "attack21":
+            cur = attack21
+        elif current_attack == "attack22":
+            cur = attack22
+        elif current_attack == "attack23":
+            cur = attack23
+        elif current_attack == "attack24":
+            cur = attack24
+        elif current_attack == "attack25":
+            cur = attack25
+        elif current_attack == "attack26":
+            cur = attack26
+        elif current_attack == "attack27":
+            cur = attack27
+        elif current_attack == "attack28":
+            cur = attack28
+        elif current_attack == "attack29":
+            cur = attack29
+        elif current_attack == "attack30":
+            cur = attack30
 
         if cur is not None:
             finished = (cur.update() == False)
@@ -289,6 +429,40 @@ def main():
                     current_attack = "attack12"
                 elif current_attack == "attack12":
                     current_attack = "attack13"
+                elif current_attack == "attack13":
+                    current_attack = "attack14"
+                elif current_attack == "attack14":
+                    current_attack = "attack15"
+                elif current_attack == "attack15":
+                    current_attack = "attack16"
+                elif current_attack == "attack16":
+                    current_attack = "attack17"
+                elif current_attack == "attack17":
+                    current_attack = "attack18"
+                elif current_attack == "attack18":
+                    current_attack = "attack19"
+                elif current_attack == "attack19":
+                    current_attack = "attack20"
+                elif current_attack == "attack20":
+                    current_attack = "attack21"
+                elif current_attack == "attack21":
+                    current_attack = "attack22"
+                elif current_attack == "attack22":
+                    current_attack = "attack23"
+                elif current_attack == "attack23":
+                    current_attack = "attack24"
+                elif current_attack == "attack24":
+                    current_attack = "attack25"
+                elif current_attack == "attack25":
+                    current_attack = "attack26"
+                elif current_attack == "attack26":
+                    current_attack = "attack27"
+                elif current_attack == "attack27":
+                    current_attack = "attack28"
+                elif current_attack == "attack28":
+                    current_attack = "attack29"
+                elif current_attack == "attack29":
+                    current_attack = "attack30"
         
         # update and draw bullets from attacks (non-blocking)
         update_bullets(move_area, player)
@@ -349,7 +523,7 @@ total: 15
 
 """
 Orange
-1
+1 Y
 2
 3
 4

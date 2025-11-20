@@ -53,20 +53,20 @@ def main():
     player.health = player.max_health
     player_turn = True
     direction = 'down'
-    attack1 = Attack_type_A(1)
-    attack2 = Attack_type_B(1)
-    attack3 = Attack_type_C(1)
-    attack4 = Attack_type_D(1)
+    attack1 = Attack_type_A(10)
+    attack2 = Attack_type_B(10)
+    attack3 = Attack_type_C(10)
+    attack4 = Attack_type_D(10)
 
-    attack5 = Attack_type_E(1)
-    attack6 = Attack_type_F(1)
-    attack7 = Attack_type_G(1)
-    attack8 = Attack_type_H(1)
-    attack9 = Attack_type_I(1)
-    attack10 = Attack_type_J(1)
+    attack5 = Attack_type_E(10)
+    attack6 = Attack_type_F(10)
+    attack7 = Attack_type_G(10)
+    attack8 = Attack_type_H(10)
+    attack9 = Attack_type_I(10)
+    attack10 = Attack_type_J(10)
 
-    attack11 = Attack_type_K(1)
-    attack12 = Attack_type_L(1)
+    attack11 = Attack_type_K(10)
+    attack12 = Attack_type_L(10)
     attack13 = Attack_type_M(10)
     attacks = [attack1, attack2, attack3, attack4]
     started = {"attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False}
@@ -342,8 +342,8 @@ Red
 123 Y
 124 Y
 134 Y
-234 N
-1234 N
+234 Y
+1234 Y
 total: 15
 """
 

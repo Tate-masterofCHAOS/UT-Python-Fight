@@ -115,8 +115,8 @@ def main():
             # spawn attack on keydown so perform_attack isn't called every frame
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if player.soul_mode == "Orange":
-                        player.soul_mode = "Blue"
+                    if player.soul_mode == "Red":
+                        player.soul_mode = "Red_M"
                         player.player_set()
                     elif player.soul_mode == "Blue":
                         player.soul_mode = "Purple"
@@ -168,19 +168,34 @@ def main():
                 direction = 'down'
 
         #Blue soul movement: Gravity effect toward bottom of battle box
-        elif player.soul_mode == "Blue":
+        elif player.soul_mode == "Red_M":
+            player2 = Player_soul("Cyan_M")
             if keys[pygame.K_LEFT]:
-                player.changex = -SPEED
+                player.changex = -SPEED * 1.5
                 direction = 'left'
             elif keys[pygame.K_RIGHT]:
-                player.changex = SPEED
+                player.changex = SPEED * 1.5
                 direction = 'right'
             if keys[pygame.K_UP]:
-                player.changey = -SPEED
+                player.changey = -SPEED * 1.5
                 direction = 'up'
             elif keys[pygame.K_DOWN]:
-                player.changey = SPEED
+                player.changey = SPEED * 1.5
                 direction = 'down'
+            if keys[pygame.K_a]:
+                player2.changex = -SPEED * 1.5
+                direction = 'left'
+            elif keys[pygame.K_d]:
+                player2.changex = SPEED * 1.5
+                direction = 'right'
+            if keys[pygame.K_w]:
+                player2.changey = -SPEED * 1.5
+                direction = 'up'
+            elif keys[pygame.K_s]:
+                player2.changey = SPEED * 1.5
+                direction = 'down'
+            player2.update(move_area)
+            player2.player_set()
 
         elif player.soul_mode == "Purple":
             if keys[pygame.K_LEFT]:
@@ -466,6 +481,7 @@ def main():
         
         # update and draw bullets from attacks (non-blocking)
         update_bullets(move_area, player)
+        
 
 
         fight.draw()

@@ -13,6 +13,7 @@ pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
 
 player = Player_soul("Red")
+player2 = Player_soul("Red")
 battle_box_x = 300
 battle_box_y = 600
 battle_box_width = 1000
@@ -54,13 +55,14 @@ def main():
     player.health = player.max_health
     player_turn = True
     direction = 'down'
-    attack1 = Attack_type_A(10)
-    attack2 = Attack_type_B(10)
-    attack3 = Attack_type_C(10)
-    attack4 = Attack_type_D(10)
+    attack0 = Attack_type_NULL(8.3)
+    attack1 = Attack_type_A(8.2)
+    attack2 = Attack_type_B(8.1)
+    attack3 = Attack_type_C(7.9)
+    attack4 = Attack_type_D(8.3)
 
-    attack5 = Attack_type_E(10)
-    attack6 = Attack_type_F(10)
+    attack5 = Attack_type_E(8.1)
+    attack6 = Attack_type_F(8.5)
     attack7 = Attack_type_G(10)
     attack8 = Attack_type_H(10)
     attack9 = Attack_type_I(10)
@@ -92,8 +94,8 @@ def main():
 
     attack30 = Attack_type_N(10)
     attacks = [attack1, attack2, attack3, attack4]
-    started = {"attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
-    current_attack = "attack1"
+    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
+    current_attack = "attack0"
 
     
     while running:
@@ -169,7 +171,7 @@ def main():
 
         #Blue soul movement: Gravity effect toward bottom of battle box
         elif player.soul_mode == "Red_M":
-            player2 = Player_soul("Cyan_M")
+            player2.soul_mode = "cyan_M"
             if keys[pygame.K_LEFT]:
                 player.changex = -SPEED * 1.5
                 direction = 'left'
@@ -210,8 +212,15 @@ def main():
             elif keys[pygame.K_DOWN]:
                 player.changey = SPEED
                 direction = 'down'
-            
-        if current_attack == "attack1":
+
+
+        if current_attack == "attack0":
+            if not started["attack0"]:
+                play_bgm_battle()
+                attack0.perform_attack()
+                started["attack0"] = True   
+                
+        elif current_attack == "attack1":
             if not started["attack1"]:
                 attack1.perform_attack()
                 started["attack1"] = True
@@ -355,7 +364,9 @@ def main():
         player.player_set()
 
         cur = None
-        if current_attack == "attack1":
+        if current_attack == "attack0":
+            cur = attack0
+        elif current_attack == "attack1":
             cur = attack1
         elif current_attack == "attack2":
             cur = attack2
@@ -420,7 +431,9 @@ def main():
             finished = (cur.update() == False)
             if finished:
                 # advance sequence
-                if current_attack == "attack1":
+                if current_attack == "attack0":
+                    current_attack = "attack1"
+                elif current_attack == "attack1":
                     current_attack = "attack2"
                 elif current_attack == "attack2":
                     current_attack = "attack3"

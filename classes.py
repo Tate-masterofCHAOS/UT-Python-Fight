@@ -253,7 +253,38 @@ class Attack:
     def perform_attack(self):
         pass
 
-    
+class Attack_type_NULL(Attack):
+    def __init__(self, length,):
+        super().__init__(length)
+        self.length = length
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
 
 #Child class for a specific type of attack
 class Attack_type_A(Attack):

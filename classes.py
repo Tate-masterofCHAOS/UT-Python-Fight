@@ -1048,8 +1048,8 @@ class Player_soul:
         self.changex = changex
         self.changey = changey
         self.rect = self.img.get_rect(topleft=(x, y))
-        self.health = 92
-        self.max_health = 92
+        self.health = 90000
+        self.max_health = 90000
 
     def update(self, boundary_rect):
             self.x += self.changex

@@ -10,9 +10,14 @@ pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
 
 #Plays background music for battle scenes
-def play_bgm_battle(time):
+def play_bgm_battle():
     mixer.music.load(r'resources\Undertale Time Paradox [OST] - Doopix.mp3')
     mixer.music.play(-1)
+
+def play_bgm_battle2():
+    mixer.music.load(r'resources\[Aftertale Original] SharaX - Hello World (Fatal Error).mp3')
+    mixer.music.play(-1)
+
 
 #Plays sound effect for selection actions
 def select_sound():

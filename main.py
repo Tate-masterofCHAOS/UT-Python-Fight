@@ -61,21 +61,25 @@ def main():
     attack3 = Attack_type_C(7.9)
     attack4 = Attack_type_D(8.3)
 
-    attack5 = Attack_type_E(8.1)
-    attack6 = Attack_type_F(8.5)
-    attack7 = Attack_type_G(10)
-    attack8 = Attack_type_H(10)
-    attack9 = Attack_type_I(10)
-    attack10 = Attack_type_J(1)
+    attack5 = Attack_type_E(8.15)
+    attack6 = Attack_type_F(8.45)
+    attack7 = Attack_type_G(8.15)
+    attack8 = Attack_type_H(8.15)
+    attack9 = Attack_type_I(8.3)
+    attack10 = Attack_type_J(9.5)
 
-    attack11 = Attack_type_K(10)
-    attack12 = Attack_type_L(10)
-    attack13 = Attack_type_M(10)
-    attack14 = Attack_type_O(10)
+    attack11 = Attack_type_K(13.5)
+    attack12 = Attack_type_L(8.3)
+    attack13 = Attack_type_M(8.3)
+    attack14 = Attack_type_O(7.9)
 
-    attack15 = Attack_type_N(10)
+    attack15 = Attack_type_N(8.2)
 
-    attack16 = Attack_type_A(10)
+    attack_wait = Attack_type_NULL(12.3)
+    attack_wait_2 = Attack_type_NULL(11)
+    attack_wait_3 = Attack_type_NULL(23)
+
+    attack16 = Attack_type_A(5.6)
     attack17 = Attack_type_B(10)
     attack18 = Attack_type_C(10)
     attack19 = Attack_type_D(10)
@@ -94,8 +98,8 @@ def main():
 
     attack30 = Attack_type_N(10)
     attacks = [attack1, attack2, attack3, attack4]
-    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
-    current_attack = "attack0"
+    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": False, "attack_wait_3": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
+    current_attack = "attack_wait_2"
 
     
     while running:
@@ -280,12 +284,26 @@ def main():
             if not started["attack15"]:
                 attack15.perform_attack()
                 started["attack15"] = True
-        elif current_attack == "attack16":
-            if not started["attack16"]:
+        elif current_attack == "attack_wait":
+            if not started["attack_wait"]:
+                attack_wait.perform_attack()
+                started["attack_wait"] = True
+        elif current_attack == "attack_wait_2":
+            if not started["attack_wait_2"]:
+                mixer.music.stop()
+                play_bgm_battle2()
+                attack_wait_2.perform_attack()
+                started["attack_wait_2"] = True
+        elif current_attack == "attack_wait_3":
+            if not started["attack_wait_3"]:
                 player.soul_mode = "Orange"
                 enemy_image = pygame.image.load(r'resources\ff644481-c0b2-40d9-84a1-d47a51d3bcf4.png')
                 enemy_image = pygame.transform.scale(enemy_image, (350,350))
                 player.health = player.max_health
+                attack_wait_3.perform_attack()
+                started["attack_wait_3"] = True
+        elif current_attack == "attack16":
+            if not started["attack16"]:
                 attack16.perform_attack()
                 started["attack16"] = True
         elif current_attack == "attack17":
@@ -396,6 +414,12 @@ def main():
             cur = attack14
         elif current_attack == "attack15":
             cur = attack15
+        elif current_attack == "attack_wait":
+            cur = attack_wait
+        elif current_attack == "attack_wait_2":
+            cur = attack_wait_2
+        elif current_attack == "attack_wait_3":
+            cur = attack_wait_3
         elif current_attack == "attack16":
             cur = attack16
         elif current_attack == "attack17":
@@ -462,6 +486,12 @@ def main():
                 elif current_attack == "attack14":
                     current_attack = "attack15"
                 elif current_attack == "attack15":
+                    current_attack = "attack_wait"
+                elif current_attack == "attack_wait":
+                    current_attack = "attack_wait_2"
+                elif current_attack == "attack_wait_2":
+                    current_attack = "attack_wait_3"
+                elif current_attack == "attack_wait_3":
                     current_attack = "attack16"
                 elif current_attack == "attack16":
                     current_attack = "attack17"

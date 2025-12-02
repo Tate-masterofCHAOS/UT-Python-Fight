@@ -18,6 +18,10 @@ def play_bgm_battle2():
     mixer.music.load(r'resources\[Aftertale Original] SharaX - Hello World (Fatal Error).mp3')
     mixer.music.play(-1)
 
+def damage_sound():
+    damage = pygame.mixer.Sound(r'resources\Taken_damage.mp3')
+    damage.set_volume(0.3)
+    damage.play()
 
 #Plays sound effect for selection actions
 def select_sound():

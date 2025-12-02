@@ -77,11 +77,11 @@ def main():
 
     attack_wait = Attack_type_NULL(12.3)
     attack_wait_2 = Attack_type_NULL(11)
-    attack_wait_3 = Attack_type_NULL(23)
+    attack_wait_3 = Attack_type_NULL(12)
 
-    attack16 = Attack_type_A(5.6)
-    attack17 = Attack_type_B(10)
-    attack18 = Attack_type_C(10)
+    attack16 = Attack_type_A(10.6)
+    attack17 = Attack_type_B(5.6)
+    attack18 = Attack_type_C(6.8)
     attack19 = Attack_type_D(10)
 
     attack20 = Attack_type_E(10)
@@ -99,7 +99,7 @@ def main():
     attack30 = Attack_type_N(10)
     attacks = [attack1, attack2, attack3, attack4]
     started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": False, "attack_wait_3": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
-    current_attack = "attack_wait_2"
+    current_attack = "attack0"
 
     
     while running:

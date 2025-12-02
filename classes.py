@@ -4,7 +4,7 @@ from pygame import mixer
 import random
 import time
 import math
-
+from Basic_functions import damage_sound
 pygame.init()
  
 screen = pygame.display.set_mode((1600,1200))
@@ -71,6 +71,7 @@ class Bullet_type_A(Bullet):
     def hit(self, player):
         if self.rect.colliderect(player.rect):
             player.health -= random.randint(1, 10)
+            damage_sound()
             return True
         return False
     def clear(self):
@@ -120,6 +121,7 @@ class Bullet_type_B(Bullet):
         if self.rect.colliderect(player.rect):
             player.health -= random.randint(1, 10)
             return True
+            damage_sound()
         return False
     def clear(self):
         self.active_bullets.clear()
@@ -191,6 +193,7 @@ class Bullet_type_C(Bullet):
         if self.rect.colliderect(player.rect):
             player.health -= random.randint(1, 10)
             return True
+            damage_sound()
         return False
     def clear(self):
         self.active_bullets.clear()
@@ -239,6 +242,7 @@ class Bullet_type_D(Bullet):
         if self.rect.colliderect(player.rect):
             player.health -= random.randint(1, 10)
             return True
+            damage_sound()
         return False
     def clear(self):
         self.active_bullets.clear()
@@ -1048,8 +1052,8 @@ class Player_soul:
         self.changex = changex
         self.changey = changey
         self.rect = self.img.get_rect(topleft=(x, y))
-        self.health = 90000
-        self.max_health = 90000
+        self.health = 92
+        self.max_health = 92
 
     def update(self, boundary_rect):
             self.x += self.changex

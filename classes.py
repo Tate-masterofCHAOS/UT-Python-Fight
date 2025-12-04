@@ -1098,6 +1098,7 @@ class Button:
                 self.clicked = True
                 action = True
                 print("Clicked")
+                return self.clicked
             else:
                 action = False
                 self.clicked = False

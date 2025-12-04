@@ -4,6 +4,7 @@ import math
 from classes import *
 from pygame import mixer
 from Basic_functions import *
+import time
 
 pygame.init()
 
@@ -47,6 +48,63 @@ SPEED = 1
 direction = 'down'
 direction2 = "down"
 
+def menu():
+    menu_image = pygame.image.load(r'resources\menu_background.webp')
+    menu_image = pygame.transform.scale(menu_image, (1600,1200))
+    screen.blit(menu_image, (0,0))
+    title_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
+    title_text = title_font.render("Perfectly normal code...", True, (255, 255, 255))
+    subtitle_text = title_font.render("is that a bug?", True, (255, 255, 255))
+    screen.blit(title_text, (100,100))
+    pygame.display.update()
+    time.sleep(1)
+    screen.blit(subtitle_text, (100,250))
+    start_img = pygame.image.load(r'resources\start_btn.png').convert_alpha()
+    quit_img = pygame.image.load(r'resources\quit_button.png').convert_alpha()
+    strt_button = Button(100, 500, start_img, 1)
+    quit_btnton = Button(100, 750, quit_img, 1)
+    pygame.display.update()
+    time.sleep(.5)
+    strt_button.draw()
+    pygame.display.update()
+    time.sleep(.5)
+    quit_btnton.draw()
+    pygame.display.update()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = event.pos
+                # helper: detect click even if Button doesn't expose rect
+                def btn_clicked(btn):
+                    rect = getattr(btn, "rect", None)
+                    if rect:
+                        return rect.collidepoint((mx, my))
+                    bx = getattr(btn, "x", getattr(btn, "pos_x", None))
+                    by = getattr(btn, "y", getattr(btn, "pos_y", None))
+                    img = getattr(btn, "img", getattr(btn, "image", None))
+                    scale = getattr(btn, "scale", None)
+                    if bx is None or by is None or img is None:
+                        return False
+                    w, h = img.get_width(), img.get_height()
+                    if scale:
+                        try:
+                            w = int(w * scale); h = int(h * scale)
+                        except Exception:
+                            pass
+                    return (bx <= mx <= bx + w) and (by <= my <= by + h)
+
+                if btn_clicked(strt_button):
+                    return
+                if btn_clicked(quit_btnton):
+                    pygame.quit()
+                    return
+
+                
+        pygame.display.update()
 
 def main():
     global direction
@@ -102,7 +160,7 @@ def main():
     started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
     current_attack = "attack0"
 
-    
+    menu()
     while running:
         screen.fill((0,0,0))
         pygame.draw.rect(screen, WHITE, battle_box, 10)
@@ -297,13 +355,14 @@ def main():
         elif current_attack == "attack_wait_3":
             if not started["attack_wait_3"]:
                 player.soul_mode = "Orange"
-                enemy_image = pygame.image.load(r'resources\ff644481-c0b2-40d9-84a1-d47a51d3bcf4.png')
-                enemy_image = pygame.transform.scale(enemy_image, (350,350))
-                player.health = player.max_health
                 attack_wait_3.perform_attack()
                 started["attack_wait_3"] = True
         elif current_attack == "attack16":
             if not started["attack16"]:
+                enemy_image = pygame.image.load(r'resources\ff644481-c0b2-40d9-84a1-d47a51d3bcf4.png')
+                enemy_image = pygame.transform.scale(enemy_image, (350,350))
+                player.health = player.max_health
+                player.soul_mode = "Orange"
                 attack16.perform_attack()
                 started["attack16"] = True
         elif current_attack == "attack17":

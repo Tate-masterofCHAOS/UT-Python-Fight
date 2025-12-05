@@ -42,11 +42,71 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 PURPLE = (156, 0, 156)
 
-
+invincible = False
 
 SPEED = 1
 direction = 'down'
 direction2 = "down"
+
+def settings_menu():
+    settings_image = pygame.image.load(r'resources\menu_background.webp')
+    settings_image = pygame.transform.scale(settings_image, (1600,1200))
+    back_img = pygame.image.load(r'resources\return.png').convert_alpha()
+    inf_hp_selected = pygame.image.load(r'resources\InfHP_Selected.png').convert_alpha()
+    inf_hp_unselected = pygame.image.load(r'resources\inf-hp.png').convert_alpha()
+
+    back_button = Button(100, 950, back_img, 1)
+    inf_hp_button = Button(100, 400, inf_hp_unselected, 1)
+
+    title_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
+
+    def btn_clicked(btn, mx, my):
+        rect = getattr(btn, "rect", None)
+        if rect:
+            return rect.collidepoint((mx, my))
+        bx = getattr(btn, "x", getattr(btn, "pos_x", None))
+        by = getattr(btn, "y", getattr(btn, "pos_y", None))
+        img = getattr(btn, "img", getattr(btn, "image", None))
+        scale = getattr(btn, "scale", None)
+        if bx is None or by is None or img is None:
+            return False
+        w, h = img.get_width(), img.get_height()
+        if scale:
+            try:
+                w = int(w * scale); h = int(h * scale)
+            except Exception:
+                pass
+        return (bx <= mx <= bx + w) and (by <= my <= by + h)
+
+    while True:
+        # draw background + title every frame
+        screen.blit(settings_image, (0,0))
+        title_text = title_font.render("Settings", True, (255, 255, 255))
+        screen.blit(title_text, (100,100))
+
+        # draw buttons
+        inf_hp_button.draw()
+        back_button.draw()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = event.pos
+                if btn_clicked(back_button, mx, my):
+                    return
+                if btn_clicked(inf_hp_button, mx, my):
+                    if inf_hp_button.img == inf_hp_selected:
+                        inf_hp_button.img = inf_hp_unselected
+                        global invincible
+                        invincible = False
+                    else:
+                        inf_hp_button.img = inf_hp_selected
+                        invincible
+                        invincible = True
+
+        pygame.display.update()
 
 def menu():
     menu_image = pygame.image.load(r'resources\menu_background.webp')
@@ -61,17 +121,25 @@ def menu():
     screen.blit(subtitle_text, (100,250))
     start_img = pygame.image.load(r'resources\start_btn.png').convert_alpha()
     quit_img = pygame.image.load(r'resources\quit_button.png').convert_alpha()
-    strt_button = Button(100, 500, start_img, 1)
-    quit_btnton = Button(100, 750, quit_img, 1)
+    settings_img = pygame.image.load(r'resources\settings_btn.png').convert_alpha()
+    strt_button = Button(100, 450, start_img, 1)
+    settings_button = Button(100, 700, settings_img, 1)
+    quit_btnton = Button(100, 950, quit_img, 1)
     pygame.display.update()
     time.sleep(.5)
     strt_button.draw()
+    pygame.display.update()
+    time.sleep(.5)
+    settings_button.draw()
     pygame.display.update()
     time.sleep(.5)
     quit_btnton.draw()
     pygame.display.update()
 
     while True:
+        strt_button.draw()
+        settings_button.draw()
+        quit_btnton.draw()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -99,6 +167,9 @@ def menu():
 
                 if btn_clicked(strt_button):
                     return
+                if btn_clicked(settings_button):
+                    settings_menu()
+                    menu()
                 if btn_clicked(quit_btnton):
                     pygame.quit()
                     return
@@ -107,6 +178,7 @@ def menu():
         pygame.display.update()
 
 def main():
+    global invincible
     global direction
     enemy_image = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
     enemy_image = pygame.transform.scale(enemy_image, (350,350))
@@ -594,7 +666,9 @@ def main():
         act.draw()
         item.draw()
         mercy.draw()
-
+        if invincible:
+            if player.health < player.max_health:
+                player.health = player.max_health
         if player.health <= 0:
             screen.fill((0,0,0))
             game_over_display = game_over_font.render("GAME OVER", True, (255, 0, 0))

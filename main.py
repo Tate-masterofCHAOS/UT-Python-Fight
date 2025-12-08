@@ -54,9 +54,23 @@ def settings_menu():
     back_img = pygame.image.load(r'resources\return.png').convert_alpha()
     inf_hp_selected = pygame.image.load(r'resources\InfHP_Selected.png').convert_alpha()
     inf_hp_unselected = pygame.image.load(r'resources\inf-hp.png').convert_alpha()
+    volume_medium_image = pygame.image.load(r'resources\vol_medium_btn.png').convert_alpha()
+    volume_low_image = pygame.image.load(r'resources\vol_low_btn.png').convert_alpha()
+    volume_high_image = pygame.image.load(r'resources\vol_high_btn.png').convert_alpha()
+    volume_off_image = pygame.image.load(r'resources\vol_0_btn.png').convert_alpha()
 
     back_button = Button(100, 950, back_img, 1)
     inf_hp_button = Button(100, 400, inf_hp_unselected, 1)
+    volume_button = Button(100, 700, volume_medium_image, 1)
+
+    volume_states = [volume_off_image, volume_low_image, volume_medium_image, volume_high_image]
+    # start at medium (index 2)
+    global vol_idx
+    vol_idx = 2
+    volume_button = Button(100, 700, volume_states[vol_idx], 1)
+    # volumes mapped to indices (clamp high to 1.0)
+    global volume_values
+    volume_values = [0.0, 0.5, 1.0, 1.5]
 
     title_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
 
@@ -87,7 +101,7 @@ def settings_menu():
         # draw buttons
         inf_hp_button.draw()
         back_button.draw()
-
+        volume_button.draw()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -105,6 +119,12 @@ def settings_menu():
                         inf_hp_button.img = inf_hp_selected
                         invincible
                         invincible = True
+                if btn_clicked(volume_button, mx, my):
+                    # advance index and update button image + mixer volume
+                    vol_idx = (vol_idx + 1) % len(volume_states)
+                    volume_button.img = volume_states[vol_idx]
+                    mixer.music.set_volume(volume_values[vol_idx])
+                    time.sleep(0.1)  # debounce
 
         pygame.display.update()
 
@@ -180,6 +200,9 @@ def menu():
 def main():
     global invincible
     global direction
+    #menu bgm
+    pygame.mixer.music.load(r'resources\background.mp3')
+    pygame.mixer.music.play(-1)
     enemy_image = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
     enemy_image = pygame.transform.scale(enemy_image, (350,350))
     running = True
@@ -210,29 +233,30 @@ def main():
     attack_wait_2 = Attack_type_NULL(0)
     attack_wait_3 = Attack_type_NULL(0)
 
-    attack16 = Attack_type_A(8)
-    attack17 = Attack_type_B(8)
-    attack18 = Attack_type_C(6)
-    attack19 = Attack_type_D(4)
+    attack16 = Attack_type_J(9)
+    attack17 = Attack_type_K(8)
+    attack18 = Attack_type_L(6)
+    attack19 = Attack_type_M(4)
 
-    attack20 = Attack_type_E(8)
-    attack21 = Attack_type_F(8.5)
+    attack20 = Attack_type_O(8)
+    attack21 = Attack_type_N(8.5)
     attack22 = Attack_type_G(10)
     attack23 = Attack_type_H(10)
-    attack24 = Attack_type_I(10)
-    attack25 = Attack_type_J(10)
+    attack16 = Attack_type_I(10)
+    attack17 = Attack_type_J(10)
 
-    attack26 = Attack_type_K(10)
-    attack27 = Attack_type_L(10)
-    attack28 = Attack_type_M(10)
-    attack29 = Attack_type_O(10)
+    attack18 = Attack_type_K(10)
+    attack19 = Attack_type_L(10)
+    attack20 = Attack_type_M(10)
+    attack21 = Attack_type_O(10)
 
     attack30 = Attack_type_N(10)
     attacks = [attack1, attack2, attack3, attack4]
-    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False, "attack22": False, "attack23": False, "attack24": False, "attack25": False, "attack26": False, "attack27": False, "attack28": False, "attack29": False, "attack30": False}
+    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
     current_attack = "attack0"
 
     menu()
+    pygame.mixer.music.stop()
     while running:
         screen.fill((0,0,0))
         pygame.draw.rect(screen, WHITE, battle_box, 10)
@@ -462,51 +486,6 @@ def main():
                 player.soul_mode = "Orange"
                 attack21.perform_attack()
                 started["attack21"] = True
-        elif current_attack == "attack22":
-            if not started["attack22"]:
-                player.soul_mode = "Orange"
-                attack22.perform_attack()
-                started["attack22"] = True
-        elif current_attack == "attack23":
-            if not started["attack23"]:
-                player.soul_mode = "Orange"
-                attack23.perform_attack()
-                started["attack23"] = True
-        elif current_attack == "attack24":
-            if not started["attack24"]:
-                player.soul_mode = "Orange"
-                attack24.perform_attack()
-                started["attack24"] = True
-        elif current_attack == "attack25":
-            if not started["attack25"]:
-                player.soul_mode = "Orange"
-                attack25.perform_attack()
-                started["attack25"] = True
-        elif current_attack == "attack26":
-            if not started["attack26"]:
-                player.soul_mode = "Orange"
-                attack26.perform_attack()
-                started["attack26"] = True
-        elif current_attack == "attack27":
-            if not started["attack27"]:
-                player.soul_mode = "Orange"
-                attack27.perform_attack()
-                started["attack27"] = True
-        elif current_attack == "attack28":
-            if not started["attack28"]:
-                player.soul_mode = "Orange"
-                attack28.perform_attack()
-                started["attack28"] = True
-        elif current_attack == "attack29":
-            if not started["attack29"]:
-                player.soul_mode = "Orange"
-                attack29.perform_attack()
-                started["attack29"] = True
-        elif current_attack == "attack30":
-            if not started["attack30"]:
-                player.soul_mode = "Orange"
-                attack30.perform_attack()
-                started["attack30"] = True
 
 
         player.update(move_area)
@@ -567,24 +546,6 @@ def main():
             cur = attack20
         elif current_attack == "attack21":
             cur = attack21
-        elif current_attack == "attack22":
-            cur = attack22
-        elif current_attack == "attack23":
-            cur = attack23
-        elif current_attack == "attack24":
-            cur = attack24
-        elif current_attack == "attack25":
-            cur = attack25
-        elif current_attack == "attack26":
-            cur = attack26
-        elif current_attack == "attack27":
-            cur = attack27
-        elif current_attack == "attack28":
-            cur = attack28
-        elif current_attack == "attack29":
-            cur = attack29
-        elif current_attack == "attack30":
-            cur = attack30
 
         if cur is not None:
             finished = (cur.update() == False)
@@ -637,25 +598,9 @@ def main():
                 elif current_attack == "attack19":
                     current_attack = "attack20"
                 elif current_attack == "attack20":
-                    current_attack = "attack21"
+                    current_attack = "none"
                 elif current_attack == "attack21":
-                    current_attack = "attack22"
-                elif current_attack == "attack22":
-                    current_attack = "attack23"
-                elif current_attack == "attack23":
-                    current_attack = "attack24"
-                elif current_attack == "attack24":
-                    current_attack = "attack25"
-                elif current_attack == "attack25":
-                    current_attack = "attack26"
-                elif current_attack == "attack26":
-                    current_attack = "attack27"
-                elif current_attack == "attack27":
-                    current_attack = "attack28"
-                elif current_attack == "attack28":
-                    current_attack = "attack29"
-                elif current_attack == "attack29":
-                    current_attack = "attack30"
+                    current_attack = "none"
         
         # update and draw bullets from attacks (non-blocking)
         update_bullets(move_area, player)

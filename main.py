@@ -1,6 +1,4 @@
 import pygame
-import random
-import math
 from classes import *
 from pygame import mixer
 from Basic_functions import *
@@ -14,7 +12,6 @@ pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
 
 player = Player_soul("Red")
-player2 = Player_soul("Red")
 battle_box_x = 300
 battle_box_y = 600
 battle_box_width = 1000
@@ -46,7 +43,6 @@ invincible = False
 
 SPEED = 1
 direction = 'down'
-direction2 = "down"
 
 def settings_menu():
     settings_image = pygame.image.load(r'resources\menu_background.webp')
@@ -109,8 +105,10 @@ def settings_menu():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
                 if btn_clicked(back_button, mx, my):
+                    select_sound()
                     return
                 if btn_clicked(inf_hp_button, mx, my):
+                    select_sound()
                     if inf_hp_button.img == inf_hp_selected:
                         inf_hp_button.img = inf_hp_unselected
                         global invincible
@@ -120,6 +118,7 @@ def settings_menu():
                         invincible
                         invincible = True
                 if btn_clicked(volume_button, mx, my):
+                    select_sound()
                     # advance index and update button image + mixer volume
                     vol_idx = (vol_idx + 1) % len(volume_states)
                     volume_button.img = volume_states[vol_idx]
@@ -186,8 +185,10 @@ def menu():
                     return (bx <= mx <= bx + w) and (by <= my <= by + h)
 
                 if btn_clicked(strt_button):
+                    select_sound()
                     return
                 if btn_clicked(settings_button):
+                    select_sound()
                     settings_menu()
                     menu()
                 if btn_clicked(quit_btnton):
@@ -207,7 +208,6 @@ def main():
     enemy_image = pygame.transform.scale(enemy_image, (350,350))
     running = True
     player.health = player.max_health
-    player_turn = True
     direction = 'down'
     attack0 = Attack_type_NULL(8.3)
     attack1 = Attack_type_A(8.2)
@@ -230,8 +230,6 @@ def main():
     attack15 = Attack_type_N(8.2)
 
     attack_wait = Attack_type_NULL(15.3)
-    attack_wait_2 = Attack_type_NULL(0)
-    attack_wait_3 = Attack_type_NULL(0)
 
     attack16 = Attack_type_J(9)
     attack17 = Attack_type_K(8)
@@ -240,18 +238,7 @@ def main():
 
     attack20 = Attack_type_O(8)
     attack21 = Attack_type_N(8.5)
-    attack22 = Attack_type_G(10)
-    attack23 = Attack_type_H(10)
-    attack16 = Attack_type_I(10)
-    attack17 = Attack_type_J(10)
-
-    attack18 = Attack_type_K(10)
-    attack19 = Attack_type_L(10)
-    attack20 = Attack_type_M(10)
-    attack21 = Attack_type_O(10)
-
-    attack30 = Attack_type_N(10)
-    attacks = [attack1, attack2, attack3, attack4]
+    attack_wait_2 = Attack_type_NULL(3)
     started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
     current_attack = "attack0"
 
@@ -274,23 +261,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             # spawn attack on keydown so perform_attack isn't called every frame
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    if player.soul_mode == "Red":
-                        player.soul_mode = "Red_M"
-                        player.player_set()
-                    elif player.soul_mode == "Blue":
-                        player.soul_mode = "Purple"
-                        player.player_set()
-                    elif player.soul_mode == "Purple":
-                        player.soul_mode = "Red"
-                        player.player_set()
 
         keys = pygame.key.get_pressed()
         # reset velocities each frame
         player.changex = 0
-        if player.soul_mode != "Blue":
-            player.changey = 0
+        player.changey = 0
 
         if player.soul_mode == "Red":
             if keys[pygame.K_LEFT]:
@@ -326,49 +301,6 @@ def main():
             if keys[pygame.K_UP]:
                 direction = 'up'
             elif keys[pygame.K_DOWN]:
-                direction = 'down'
-
-        #Blue soul movement: Gravity effect toward bottom of battle box
-        elif player.soul_mode == "Red_M":
-            player2.soul_mode = "Cyan_M"
-            if keys[pygame.K_LEFT]:
-                player.changex = -SPEED * 1.5
-                direction = 'left'
-            elif keys[pygame.K_RIGHT]:
-                player.changex = SPEED * 1.5
-                direction = 'right'
-            if keys[pygame.K_UP]:
-                player.changey = -SPEED * 1.5
-                direction = 'up'
-            elif keys[pygame.K_DOWN]:
-                player.changey = SPEED * 1.5
-                direction = 'down'
-            if player2.soul_mode == "Cyan_M":
-                if keys[pygame.K_a]:
-                    player2.changex = -SPEED * 1.5
-                elif keys[pygame.K_d]:
-                    player2.changex = SPEED * 1.5
-                elif keys[pygame.K_w]:
-                    player2.changey = -SPEED * 1.5
-                elif keys[pygame.K_s]:
-                    player2.changey = SPEED * 1.5
-                else:
-                    player2.changey =0  # gravity effect
-                    player2.changex =0  # air resistance
-            
-
-        elif player.soul_mode == "Purple":
-            if keys[pygame.K_LEFT]:
-                player.changex = -SPEED
-                direction = 'left'
-            elif keys[pygame.K_RIGHT]:
-                player.changex = SPEED
-                direction = 'right'
-            if keys[pygame.K_UP]:
-                player.changey = -SPEED
-                direction = 'up'
-            elif keys[pygame.K_DOWN]:
-                player.changey = SPEED
                 direction = 'down'
 
 
@@ -442,17 +374,6 @@ def main():
             if not started["attack_wait"]:
                 attack_wait.perform_attack()
                 started["attack_wait"] = True
-        elif current_attack == "attack_wait_2":
-            if not started["attack_wait_2"]:
-                mixer.music.stop()
-                play_bgm_battle2()
-                attack_wait_2.perform_attack()
-                started["attack_wait_2"] = True
-        elif current_attack == "attack_wait_3":
-            if not started["attack_wait_3"]:
-                player.soul_mode = "Orange"
-                attack_wait_3.perform_attack()
-                started["attack_wait_3"] = True
         elif current_attack == "attack16":
             if not started["attack16"]:
                 enemy_image = pygame.image.load(r'resources\ff644481-c0b2-40d9-84a1-d47a51d3bcf4.png')
@@ -486,13 +407,18 @@ def main():
                 player.soul_mode = "Orange"
                 attack21.perform_attack()
                 started["attack21"] = True
+        elif current_attack == "wait_2":
+            attack_wait_2.perform_attack()
+            started["attack_wait_2"] = True
+        elif current_attack == "none":
+            pygame.mixer.music.stop()
+            main()
+
+                    
 
 
         player.update(move_area)
         player.player_set()
-        if player2.soul_mode == "Cyan_M":
-            player2.update(move_area)
-            player2.player_set()
         
 
         cur = None
@@ -530,10 +456,6 @@ def main():
             cur = attack15
         elif current_attack == "attack_wait":
             cur = attack_wait
-        elif current_attack == "attack_wait_2":
-            cur = attack_wait_2
-        elif current_attack == "attack_wait_3":
-            cur = attack_wait_3
         elif current_attack == "attack16":
             cur = attack16
         elif current_attack == "attack17":
@@ -546,6 +468,8 @@ def main():
             cur = attack20
         elif current_attack == "attack21":
             cur = attack21
+        elif current_attack == "attack_wait_2":
+            cur = attack_wait_2
 
         if cur is not None:
             finished = (cur.update() == False)
@@ -584,10 +508,6 @@ def main():
                 elif current_attack == "attack15":
                     current_attack = "attack_wait"
                 elif current_attack == "attack_wait":
-                    current_attack = "attack_wait_2"
-                elif current_attack == "attack_wait_2":
-                    current_attack = "attack_wait_3"
-                elif current_attack == "attack_wait_3":
                     current_attack = "attack16"
                 elif current_attack == "attack16":
                     current_attack = "attack17"
@@ -598,8 +518,10 @@ def main():
                 elif current_attack == "attack19":
                     current_attack = "attack20"
                 elif current_attack == "attack20":
-                    current_attack = "none"
+                    current_attack = "attack21"
                 elif current_attack == "attack21":
+                    current_attack = "attack_wait_2"
+                elif current_attack == "attack_wait_2":
                     current_attack = "none"
         
         # update and draw bullets from attacks (non-blocking)
@@ -625,10 +547,8 @@ def main():
                 running = False
             if keys[pygame.K_RETURN]:
                 #delete everything and reset
-                attack1.clear()
-                attack2.clear()
-                attack3.clear()
-                attack4.clear()
+                current_attack = "attack0"
+                started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
                 player.health = player.max_health
                 
                 
@@ -641,43 +561,3 @@ def main():
 
 
 main()
-
-"""
-Red
-1 Y
-2 Y
-3 Y
-4 Y
-12 Y
-13 Y
-14 Y
-23 Y
-24 Y
-34 Y
-123 Y
-124 Y
-134 Y
-234 Y
-1234 Y
-total: 15
-"""
-
-"""
-Orange
-1 Y
-2
-3
-4
-12
-13
-14
-23
-24
-34
-123
-124
-134
-234
-1234
-total: 15
-"""

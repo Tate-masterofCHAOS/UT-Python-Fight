@@ -1020,25 +1020,14 @@ class Enemy:
 try:
     _soul_red = pygame.image.load(r'resources\soul_red.png').convert_alpha()
     _soul_orange = pygame.image.load(r'resources\soul_orange.png').convert_alpha()
-    _soul_blue = pygame.image.load(r'resources\soul_blue.webp').convert_alpha()
-    _soul_purple = pygame.image.load(r'resources\soul_purple.png').convert_alpha()
-    _soul_red_M = pygame.image.load(r'resources\soul_red_M.png').convert_alpha()
-    _soul_cyan_M = pygame.image.load(r'resources\soul_cyan_M.png').convert_alpha()
 except Exception:
     # fallback surfaces if assets missing (keeps code robust)
     _soul_red = pygame.Surface((64, 64), pygame.SRCALPHA)
     _soul_orange = pygame.Surface((64, 64), pygame.SRCALPHA)
-    _soul_blue = pygame.Surface((64, 64), pygame.SRCALPHA)
-    _soul_red_M = pygame.Surface((64, 64), pygame.SRCALPHA)
-    _soul_cyan_M = pygame.Surface((64, 64), pygame.SRCALPHA)
 
 SOUL_IMAGES = {
     "Red": pygame.transform.scale(_soul_red, (64, 64)),
     "Orange": pygame.transform.scale(_soul_orange, (64, 64)),
-    "Blue": pygame.transform.scale(_soul_blue, (64, 64)),
-    "Purple": pygame.transform.scale(_soul_purple, (64, 64)),
-    "Red_M": pygame.transform.scale(_soul_red_M, (64, 64)),
-    "Cyan_M": pygame.transform.scale(_soul_cyan_M, (64, 64)),
 }
 # ...existing code...
 class Player_soul:

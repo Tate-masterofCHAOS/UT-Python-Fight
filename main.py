@@ -407,12 +407,14 @@ def main():
                 player.soul_mode = "Orange"
                 attack21.perform_attack()
                 started["attack21"] = True
-        elif current_attack == "wait_2":
+        elif current_attack == "attack_wait_2":
             attack_wait_2.perform_attack()
             started["attack_wait_2"] = True
-        elif current_attack == "none":
             pygame.mixer.music.stop()
             main()
+        elif current_attack == "none":
+            pass
+            
 
                     
 
@@ -525,14 +527,15 @@ def main():
                     current_attack = "none"
         
         # update and draw bullets from attacks (non-blocking)
-        update_bullets(move_area, player)
-        
-
-
         fight.draw()
         act.draw()
         item.draw()
         mercy.draw()
+        update_bullets(move_area, player)
+        
+
+
+        
         if invincible:
             if player.health < player.max_health:
                 player.health = player.max_health

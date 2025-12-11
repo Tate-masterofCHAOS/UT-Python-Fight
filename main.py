@@ -307,6 +307,7 @@ def main():
         if current_attack == "attack0":
             if not started["attack0"]:
                 play_bgm_battle()
+                player.soul_mode = "Red"
                 attack0.perform_attack()
                 started["attack0"] = True   
                 
@@ -540,6 +541,10 @@ def main():
             if player.health < player.max_health:
                 player.health = player.max_health
         if player.health <= 0:
+            pygame.mixer.music.stop()
+            #delete all attacks on screen
+            current_attack = "none"
+            
             screen.fill((0,0,0))
             game_over_display = game_over_font.render("GAME OVER", True, (255, 0, 0))
             screen.blit(game_over_display, (500, 200))
@@ -553,6 +558,8 @@ def main():
                 current_attack = "attack0"
                 started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
                 player.health = player.max_health
+                
+
                 
                 
                 

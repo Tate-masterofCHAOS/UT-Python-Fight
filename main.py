@@ -6,7 +6,7 @@ import time
 
 pygame.init()
 
-screen = pygame.display.set_mode((1600,1200))
+screen = pygame.display.set_mode((1600,1200), pygame.SCALED | pygame.RESIZABLE)
 pygame.display.set_caption("UT-Fight")
 pygame_icon = pygame.image.load(r'resources\soul_red.png')
 pygame.display.set_icon(pygame_icon)
@@ -198,6 +198,25 @@ def menu():
                 
         pygame.display.update()
 
+def win_screen():
+    screen.fill((0,0,0))
+    win_display = game_over_font.render("YOU WIN!", True, (0, 255, 0))
+    screen.blit(win_display, (600, 200))
+    game_font_display2 = game_font.render("Congratulations! You have defeated the enemy!", True, (255, 255, 255))
+    screen.blit(game_font_display2, (300, 400))
+    move_on_display = game_font.render("Press any key to continue...", True, (255, 255, 255))
+    screen.blit(move_on_display, (500, 600))
+    pygame.display.flip()
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+                main()
+
+
 def main():
     global invincible
     global direction
@@ -260,6 +279,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            #full screen toggle and make it to scale properly
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F11:
+                    pygame.display.toggle_fullscreen()
+            #make it so if escape key is held for three seconds it opens main menu
+                if event.key == pygame.K_ESCAPE:
+                    start_time = time.time()
+                    while pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                        current_time = time.time()
+                        if current_time - start_time >= 3:
+                            menu()
+                            pygame.mixer.music.stop()
+                            break
             # spawn attack on keydown so perform_attack isn't called every frame
 
         keys = pygame.key.get_pressed()
@@ -412,7 +444,7 @@ def main():
             attack_wait_2.perform_attack()
             started["attack_wait_2"] = True
             pygame.mixer.music.stop()
-            main()
+            win_screen()
         elif current_attack == "none":
             pass
             

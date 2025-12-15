@@ -7,8 +7,8 @@ import time
 pygame.init()
 
 screen = pygame.display.set_mode((1600,1200), pygame.SCALED | pygame.RESIZABLE)
-pygame.display.set_caption("UT-Fight")
-pygame_icon = pygame.image.load(r'resources\soul_red.png')
+pygame.display.set_caption("BUGTALE: The Perfectly Normal Code")
+pygame_icon = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
 pygame.display.set_icon(pygame_icon)
 
 player = Player_soul("Red")

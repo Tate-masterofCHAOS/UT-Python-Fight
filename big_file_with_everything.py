@@ -1,0 +1,1736 @@
+import pygame
+from pygame import mixer
+import random
+import time
+import math
+import os
+import sys
+
+def resource_path(rel_path):
+    """Return absolute path to resource, works with PyInstaller --onefile."""
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, rel_path)
+
+# Monkey-patch pygame.image.load to try resource_path first (min change to your file).
+_orig_image_load = pygame.image.load
+def _wrapped_image_load(path, *args, **kwargs):
+    try:
+        return _orig_image_load(resource_path(path))
+    except Exception:
+        return _orig_image_load(path, *args, **kwargs)
+pygame.image.load = _wrapped_image_load
+
+# Monkey-patch pygame.mixer.Sound to load from resource_path when possible.
+_orig_sound_ctor = pygame.mixer.Sound
+def _wrapped_sound_ctor(path, *args, **kwargs):
+    try:
+        return _orig_sound_ctor(resource_path(path), *args, **kwargs)
+    except Exception:
+        return _orig_sound_ctor(path, *args, **kwargs)
+pygame.mixer.Sound = _wrapped_sound_ctor
+
+# Monkey-patch music.load similarly
+_orig_music_load = pygame.mixer.music.load
+def _wrapped_music_load(path, *args, **kwargs):
+    try:
+        return _orig_music_load(resource_path(path), *args, **kwargs)
+    except Exception:
+        return _orig_music_load(path, *args, **kwargs)
+pygame.mixer.music.load = _wrapped_music_load
+pygame.init()
+
+
+screen = pygame.display.set_mode((1600,1200), pygame.SCALED | pygame.RESIZABLE)
+pygame.display.set_caption("BUGTALE: The Perfectly Normal Code")
+pygame_icon = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
+pygame.display.set_icon(pygame_icon)
+
+#Plays background music for battle scenes
+def play_bgm_battle():
+    mixer.music.load(r'resources\Undertale Time Paradox [OST] - Doopix.mp3')
+    mixer.music.play(-1)
+
+def damage_sound():
+    damage = pygame.mixer.Sound(r'resources\Taken_damage.mp3')
+    damage.set_volume(0.3)
+    damage.play()
+
+#Plays sound effect for selection actions
+def select_sound():
+    pygame.mixer.Sound(r'resources\select.wav').play()
+
+#Parent class for bullet(projectiles)
+class Bullet:
+    def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
+        self.sprite = sprite
+        self.scale = scale
+        self.x_pos = x_pos
+        self.y_pos = y_pos
+        self.x_change = x_change
+        self.y_change = y_change
+    
+    def move(self):
+        pass
+
+    def create(self):
+        pass
+
+    def hit(self):
+        pass
+
+
+#Child class for a specific type of bullet
+active_bullets = []
+
+class Bullet_type_A(Bullet):
+    def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
+        super().__init__(sprite, scale, x_pos, y_pos, x_change, y_change)
+        self.frame1 = pygame.image.load(r'resources/attack_1_frame_1.png').convert_alpha()
+        self.frame2 = pygame.image.load(r'resources/attack_1_frame_2.png').convert_alpha()
+        self.scale = scale
+        self.frame = self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+        self.x_pos = random.randint(300, 1300) if x_pos == 0 else x_pos
+        self.y_pos = 400 if y_pos == 0 else y_pos
+        self.x_change = x_change
+        self.y_change = y_change if y_change != 0 else 5
+        self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
+        self._anim_toggle = False
+
+    def move(self):
+        self.x_pos += self.x_change
+        self.y_pos += self.y_change
+        self.rect.topleft = (int(self.x_pos), int(self.y_pos))
+        # toggle animation each frame (no sleep)
+        self._anim_toggle = not self._anim_toggle
+        self.frame = self.frame2 if self._anim_toggle else self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+
+    def create(self):
+        screen.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+             surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+            surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+
+    def hit(self, player):
+        if self.rect.colliderect(player.rect):
+            player.health -= random.randint(1, 10)
+            damage_sound()
+            return True
+        return False
+    def clear(self):
+        self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+        
+class Bullet_type_B(Bullet):
+    def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
+        super().__init__(sprite, scale, x_pos, y_pos, x_change, y_change)
+        self.frame1 = pygame.image.load(r'resources\attack_1_frame_1.png').convert_alpha()
+        self.frame1 = pygame.transform.rotate(self.frame1, 0)
+        self.frame2 = pygame.image.load(r'resources/attack_1_frame_2.png').convert_alpha()
+        self.frame2 = pygame.transform.rotate(self.frame2, 0)
+        self.scale = scale
+        self.frame = self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+        self.x_pos = 0 if x_pos == 0 else x_pos
+        self.y_pos = 600 if y_pos == 0 else y_pos
+        self.y_pos2 = 900 if y_pos == 0 else y_pos
+        self.x_change = x_change if x_change != 0 else 5
+        self.y_change = y_change 
+        self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
+        self._anim_toggle = False
+
+
+    def move(self):
+        self.x_pos += self.x_change
+        self.y_pos += self.y_change
+        self.rect.topleft = (int(self.x_pos), int(self.y_pos))
+        # toggle animation each frame (no sleep)
+        self._anim_toggle = not self._anim_toggle
+        self.frame = self.frame2 if self._anim_toggle else self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+
+
+    def create(self):
+        screen.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+             surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+            surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+
+    def hit(self, player):
+        if self.rect.colliderect(player.rect):
+            player.health -= random.randint(1, 10)
+            return True
+            damage_sound()
+        return False
+    def clear(self):
+        self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+    
+class Bullet_type_C(Bullet):
+    def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change, delay=0.5, speed=6):
+        super().__init__(sprite, scale, x_pos, y_pos, x_change, y_change)
+        self.frame1 = pygame.image.load(r'resources/attack_1_frame_1.png').convert_alpha()
+        self.frame2 = pygame.image.load(r'resources/attack_1_frame_2.png').convert_alpha()
+        self.scale = scale
+        self.frame = self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+        # spawn position
+        self.x_pos = random.randint(300, 1300) if x_pos == 0 else x_pos
+        self.y_pos = 400 if y_pos == 0 else y_pos
+        # velocity will be set after delay when targeting player
+        self.x_change = 0
+        self.y_change = 0
+        self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
+        self._anim_toggle = False
+        # delayed start fields
+        self.delay_seconds = delay
+        self.speed = speed
+        self.spawn_time = time.time()
+        self.moving = False
+
+    def move(self, player=None):
+        # if not moving yet, check delay and lock target when delay passes
+        if not self.moving:
+            if (time.time() - self.spawn_time) >= self.delay_seconds:
+                # compute direction toward player's current center (if provided)
+                if player is not None:
+                    # player center
+                    px = player.x + (player.img.get_width() / 2)
+                    py = player.y + (player.img.get_height() / 2)
+                else:
+                    # fallback target directly downward
+                    px = self.x_pos
+                    py = self.y_pos + 1
+                # bullet center
+                bx = self.x_pos + (self.transformed.get_width() / 2)
+                by = self.y_pos + (self.transformed.get_height() / 2)
+                dx = px - bx
+                dy = py - by
+                dist = math.hypot(dx, dy) or 1.0
+                self.x_change = (dx / dist) * self.speed
+                self.y_change = (dy / dist) * self.speed
+                self.moving = True
+        
+        # update position (if moving or stationary)
+        # update position (if moving or stationary)
+        self.x_pos += self.x_change
+        self.y_pos += self.y_change
+        self.rect.topleft = (int(self.x_pos), int(self.y_pos))
+
+        # toggle animation each frame (no sleep)
+        self._anim_toggle = not self._anim_toggle
+        self.frame = self.frame2 if self._anim_toggle else self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+
+    def create(self):
+        surf = pygame.display.get_surface()
+        if surf:
+            surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+
+    def hit(self, player):
+        if self.rect.colliderect(player.rect):
+            player.health -= random.randint(1, 10)
+            return True
+            damage_sound()
+        return False
+    def clear(self):
+        self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+class Bullet_type_D(Bullet):
+    def __init__(self, sprite, scale, x_pos, y_pos, x_change, y_change):
+        super().__init__(sprite, scale, x_pos, y_pos, x_change, y_change)
+        self.frame1 = pygame.image.load(r'resources\attack_1_frame_1.png').convert_alpha()
+        self.frame1 = pygame.transform.rotate(self.frame1, 0)
+        self.frame2 = pygame.image.load(r'resources/attack_1_frame_2.png').convert_alpha()
+        self.frame2 = pygame.transform.rotate(self.frame2, 0)
+        self.scale = scale
+        self.frame = self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+        self.x_pos = 300 if x_pos == 0 else x_pos
+        self.y_pos = 500 if y_pos == 0 else y_pos
+        self.x_pos2 = 1250 if x_pos == 0 else x_pos
+        self.x_change = x_change 
+        self.y_change = y_change 
+        self.rect = self.transformed.get_rect(topleft=(int(self.x_pos), int(self.y_pos)))
+        self._anim_toggle = False
+
+
+    def move(self):
+        self.x_pos += self.x_change
+        self.y_pos += self.y_change
+        self.rect.topleft = (int(self.x_pos), int(self.y_pos))
+        # toggle animation each frame (no sleep)
+        self._anim_toggle = not self._anim_toggle
+        self.frame = self.frame2 if self._anim_toggle else self.frame1
+        self.transformed = pygame.transform.scale(self.frame, self.scale)
+
+
+    def create(self):
+        screen.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+             surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+        surf = pygame.display.get_surface()
+        if surf:
+            surf.blit(self.transformed, (int(self.x_pos), int(self.y_pos)))
+
+    def hit(self, player):
+        if self.rect.colliderect(player.rect):
+            player.health -= random.randint(1, 10)
+            return True
+            damage_sound()
+        return False
+    def clear(self):
+        self.active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+#Parent class for attacks
+class Attack:
+    def __init__(self, length):
+        self.length = length
+
+    def perform_attack(self):
+        pass
+
+class Attack_type_NULL(Attack):
+    def __init__(self, length,):
+        super().__init__(length)
+        self.length = length
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+
+#Child class for a specific type of attack
+class Attack_type_A(Attack):
+    def __init__(self, length, spawn_interval=0.3):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            self.last_spawn = now
+
+        
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_B(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_C(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            active_bullets.append(a)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+   
+class Attack_type_D(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_E(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            c = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            e = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(e)
+            self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_F(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            b = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_G(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_H(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            c = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_I(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_J(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            c = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_K(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_L(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            b = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            d = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            e = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            active_bullets.append(e)
+            self.last_spawn = now
+
+class Attack_type_M(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            c = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+        
+class Attack_type_N(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            c = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            e = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            f = Bullet_type_A(None, (50, 50), 0, 0, 0, 1)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            active_bullets.append(e)
+            active_bullets.append(f)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+class Attack_type_O(Attack):
+    def __init__(self, length, spawn_interval=0.5):
+        super().__init__(length)
+        self.length = length
+        self.spawn_interval = spawn_interval  # seconds between spawns
+        self.running = False
+        self.start_time = 0.0
+        self.last_spawn = 0.0
+
+    def perform_attack(self):
+        # start the timed attack (non-blocking)
+        self.running = True
+        self.start_time = time.time()
+        self.last_spawn = 0.0
+
+
+    def update(self):
+        # call this each frame from main loop
+        if not self.running:
+            return False
+        now = time.time()
+        # stop when duration elapsed
+        if now - self.start_time >= self.length:
+            self.running = False
+            return False
+        # spawn bullets at spawn_interval
+        if self.last_spawn == 0.0 or (now - self.last_spawn) >= self.spawn_interval:
+            a = Bullet_type_D(None, (100, 100), 0, 0, 0, 1)
+            b = Bullet_type_D(None, (100, 100), 1200, 0, 0, 1)
+            d = Bullet_type_C(None, (50, 50), 0, 0, 0, 0, delay=1, speed=1)
+            c = Bullet_type_B(None, (100, 100), 0, 600, 1, 0)
+            e = Bullet_type_B(None, (100, 100), 0, 925, 1, 0)
+            active_bullets.append(a)
+            active_bullets.append(b)
+            active_bullets.append(c)
+            active_bullets.append(d)
+            active_bullets.append(e)
+            self.last_spawn = now
+    
+    def clear(self):
+        active_bullets.clear()
+        self.length = 0
+        self.perform_attack()
+
+    def is_ended(self):
+        if self.start_time >= self.length:
+            return True
+        else:
+            return False
+
+# update/draw bullets each frame; call from main loop
+def update_bullets(boundary_rect, player):
+    # get the current display/screen rect so we only remove bullets that left the screen
+    surf = pygame.display.get_surface()
+    if surf:
+        screen_rect = surf.get_rect()
+    else:
+        # fallback: large rect covering expected window size
+        screen_rect = pygame.Rect(0, 0, 1600, 1200)
+
+    for b in active_bullets[:]:
+        if isinstance(b, Bullet_type_C):
+            b.move(player)
+        else:
+            b.move()
+        # remove bullets that have left the screen entirely
+        if not screen_rect.colliderect(b.rect):
+            try:
+                active_bullets.remove(b)
+            except ValueError:
+                pass
+            continue
+
+        # draw and check collision against the player (still use boundary_rect if desired for hits)
+        b.create()
+        if b.hit(player):
+            try:
+                active_bullets.remove(b)
+            except ValueError:
+                pass
+        
+
+#Parent class for enemies
+class Enemy:
+    def __init__(self, health):
+        self.health = health
+        self.max_health = health
+        self.attacks = []
+
+#Class for the player, specifically the soul that appears during fights
+try:
+    _soul_red = pygame.image.load(r'resources\soul_red.png').convert_alpha()
+    _soul_orange = pygame.image.load(r'resources\soul_orange.png').convert_alpha()
+except Exception:
+    # fallback surfaces if assets missing (keeps code robust)
+    _soul_red = pygame.Surface((64, 64), pygame.SRCALPHA)
+    _soul_orange = pygame.Surface((64, 64), pygame.SRCALPHA)
+
+SOUL_IMAGES = {
+    "Red": pygame.transform.scale(_soul_red, (64, 64)),
+    "Orange": pygame.transform.scale(_soul_orange, (64, 64)),
+}
+# ...existing code...
+class Player_soul:
+    def __init__(self, soul_mode, x=800-32, y=600-32, changex=0, changey=0):
+        # use preloaded images instead of loading every frame
+        self.soul_mode = soul_mode
+        self.img = SOUL_IMAGES.get(self.soul_mode, SOUL_IMAGES["Red"])
+        self.current_mode = self.soul_mode  # remember which image is active
+        self.x = x
+        self.y = y
+        self.changex = changex
+        self.changey = changey
+        self.rect = self.img.get_rect(topleft=(x, y))
+        self.health = 92
+        self.max_health = 92
+
+    def update(self, boundary_rect):
+            self.x += self.changex
+            self.y += self.changey
+            self.rect.topleft = (self.x, self.y)
+
+            self.rect.clamp_ip(boundary_rect)
+
+            # ensure position variables match the clamped rect
+            self.x, self.y = self.rect.topleft
+
+            # only swap the image if the mode actually changed
+            if self.soul_mode != self.current_mode:
+                self.img = SOUL_IMAGES.get(self.soul_mode, SOUL_IMAGES["Red"])
+                self.current_mode = self.soul_mode
+
+    def player_set(self):
+         screen.blit(self.img, (self.x, self.y))
+         surf = pygame.display.get_surface()
+         if surf:
+             surf.blit(self.img, (int(self.x), int(self.y)))
+        
+
+#Class for buttons
+class Button:
+    def __init__(self, x, y, img, scale):
+        self.x = x
+        self.y = y
+        self.img = img
+        width = img.get_width()
+        height = img.get_height()
+        self.img = pygame.transform.scale(img, (int(width * scale), int(height * scale)))
+        self.rect = self.img.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def draw(self):
+        pos = pygame.mouse.get_pos()
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.clicked = True
+                action = True
+                print("Clicked")
+                return self.clicked
+            else:
+                action = False
+                self.clicked = False
+                
+        screen.blit(self.img, (self.x, self.y))
+
+
+player = Player_soul("Red")
+battle_box_x = 300
+battle_box_y = 600
+battle_box_width = 1000
+battle_box_height = 400
+battle_box = pygame.Rect(300, 600, 1000, 400)
+
+Fight_btn = pygame.image.load(r'resources\Fight_btn.png')   
+fight = Button(320, 1070, Fight_btn, .305)
+Act_btn = pygame.image.load(r'resources\Act_btn.png')   
+act = Button(570, 1070, Act_btn, .42)
+Item_btn = pygame.image.load(r'resources\Item_btn.png')   
+item = Button(820, 1070, Item_btn, .42)
+mercy_btn = pygame.image.load(r'resources\Mercy_btn.png')   
+mercy = Button(1070, 1070, mercy_btn  , .42)
+WHITE = (255, 255, 255)
+move_area = pygame.Rect(battle_box_x+10, battle_box_y+10, battle_box_width-20, battle_box_height-20)
+
+game_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 50)
+game_over_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
+
+
+
+
+RED = (255, 0, 0)
+YELLOW = (255, 255, 0)
+PURPLE = (156, 0, 156)
+
+invincible = False
+
+SPEED = 1
+direction = 'down'
+
+def settings_menu():
+    settings_image = pygame.image.load(r'resources\menu_background.webp')
+    settings_image = pygame.transform.scale(settings_image, (1600,1200))
+    back_img = pygame.image.load(r'resources\return.png').convert_alpha()
+    inf_hp_selected = pygame.image.load(r'resources\InfHP_Selected.png').convert_alpha()
+    inf_hp_unselected = pygame.image.load(r'resources\inf-hp.png').convert_alpha()
+    volume_medium_image = pygame.image.load(r'resources\vol_medium_btn.png').convert_alpha()
+    volume_low_image = pygame.image.load(r'resources\vol_low_btn.png').convert_alpha()
+    volume_high_image = pygame.image.load(r'resources\vol_high_btn.png').convert_alpha()
+    volume_off_image = pygame.image.load(r'resources\vol_0_btn.png').convert_alpha()
+
+    back_button = Button(100, 950, back_img, 1)
+    inf_hp_button = Button(100, 400, inf_hp_unselected, 1)
+    volume_button = Button(100, 700, volume_medium_image, 1)
+
+    volume_states = [volume_off_image, volume_low_image, volume_medium_image, volume_high_image]
+    # start at medium (index 2)
+    global vol_idx
+    vol_idx = 2
+    volume_button = Button(100, 700, volume_states[vol_idx], 1)
+    # volumes mapped to indices (clamp high to 1.0)
+    global volume_values
+    volume_values = [0.0, 0.5, 1.0, 1.5]
+
+    title_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
+
+    def btn_clicked(btn, mx, my):
+        rect = getattr(btn, "rect", None)
+        if rect:
+            return rect.collidepoint((mx, my))
+        bx = getattr(btn, "x", getattr(btn, "pos_x", None))
+        by = getattr(btn, "y", getattr(btn, "pos_y", None))
+        img = getattr(btn, "img", getattr(btn, "image", None))
+        scale = getattr(btn, "scale", None)
+        if bx is None or by is None or img is None:
+            return False
+        w, h = img.get_width(), img.get_height()
+        if scale:
+            try:
+                w = int(w * scale); h = int(h * scale)
+            except Exception:
+                pass
+        return (bx <= mx <= bx + w) and (by <= my <= by + h)
+
+    while True:
+        # draw background + title every frame
+        screen.blit(settings_image, (0,0))
+        title_text = title_font.render("Settings", True, (255, 255, 255))
+        screen.blit(title_text, (100,100))
+
+        # draw buttons
+        inf_hp_button.draw()
+        back_button.draw()
+        volume_button.draw()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = event.pos
+                if btn_clicked(back_button, mx, my):
+                    select_sound()
+                    return
+                if btn_clicked(inf_hp_button, mx, my):
+                    select_sound()
+                    if inf_hp_button.img == inf_hp_selected:
+                        inf_hp_button.img = inf_hp_unselected
+                        global invincible
+                        invincible = False
+                    else:
+                        inf_hp_button.img = inf_hp_selected
+                        invincible
+                        invincible = True
+                if btn_clicked(volume_button, mx, my):
+                    select_sound()
+                    # advance index and update button image + mixer volume
+                    vol_idx = (vol_idx + 1) % len(volume_states)
+                    volume_button.img = volume_states[vol_idx]
+                    mixer.music.set_volume(volume_values[vol_idx])
+                    time.sleep(0.1)  # debounce
+
+        pygame.display.update()
+
+def menu():
+    menu_image = pygame.image.load(r'resources\menu_background.webp')
+    menu_image = pygame.transform.scale(menu_image, (1600,1200))
+    screen.blit(menu_image, (0,0))
+    title_font = pygame.font.Font(r'resources\DeterminationMonoWebRegular.ttf', 100)
+    title_text = title_font.render("Perfectly normal code...", True, (255, 255, 255))
+    subtitle_text = title_font.render("is that a bug?", True, (255, 255, 255))
+    screen.blit(title_text, (100,100))
+    pygame.display.update()
+    time.sleep(1)
+    screen.blit(subtitle_text, (100,250))
+    start_img = pygame.image.load(r'resources\start_btn.png').convert_alpha()
+    quit_img = pygame.image.load(r'resources\quit_button.png').convert_alpha()
+    settings_img = pygame.image.load(r'resources\settings_btn.png').convert_alpha()
+    strt_button = Button(100, 450, start_img, 1)
+    settings_button = Button(100, 700, settings_img, 1)
+    quit_btnton = Button(100, 950, quit_img, 1)
+    pygame.display.update()
+    time.sleep(.5)
+    strt_button.draw()
+    pygame.display.update()
+    time.sleep(.5)
+    settings_button.draw()
+    pygame.display.update()
+    time.sleep(.5)
+    quit_btnton.draw()
+    pygame.display.update()
+
+    while True:
+        strt_button.draw()
+        settings_button.draw()
+        quit_btnton.draw()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mx, my = event.pos
+                # helper: detect click even if Button doesn't expose rect
+                def btn_clicked(btn):
+                    rect = getattr(btn, "rect", None)
+                    if rect:
+                        return rect.collidepoint((mx, my))
+                    bx = getattr(btn, "x", getattr(btn, "pos_x", None))
+                    by = getattr(btn, "y", getattr(btn, "pos_y", None))
+                    img = getattr(btn, "img", getattr(btn, "image", None))
+                    scale = getattr(btn, "scale", None)
+                    if bx is None or by is None or img is None:
+                        return False
+                    w, h = img.get_width(), img.get_height()
+                    if scale:
+                        try:
+                            w = int(w * scale); h = int(h * scale)
+                        except Exception:
+                            pass
+                    return (bx <= mx <= bx + w) and (by <= my <= by + h)
+
+                if btn_clicked(strt_button):
+                    select_sound()
+                    return
+                if btn_clicked(settings_button):
+                    select_sound()
+                    settings_menu()
+                    menu()
+                if btn_clicked(quit_btnton):
+                    pygame.quit()
+                    return
+
+                
+        pygame.display.update()
+
+def win_screen():
+    screen.fill((0,0,0))
+    win_display = game_over_font.render("YOU WIN!", True, (0, 255, 0))
+    screen.blit(win_display, (600, 200))
+    game_font_display2 = game_font.render("Congratulations! You have defeated the enemy!", True, (255, 255, 255))
+    screen.blit(game_font_display2, (300, 400))
+    move_on_display = game_font.render("Press any key to continue...", True, (255, 255, 255))
+    screen.blit(move_on_display, (500, 600))
+    pygame.display.flip()
+    going = True
+    while going:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                going = False
+                pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+                main()
+
+
+def main():
+    global invincible
+    global direction
+    #menu bgm
+    pygame.mixer.music.load(r'resources\background.mp3')
+    pygame.mixer.music.play(-1)
+    enemy_image = pygame.image.load(r'resources\327f38c6-409c-4cf8-a435-13d70c4b87f7.png')
+    enemy_image = pygame.transform.scale(enemy_image, (350,350))
+    running = True
+    player.health = player.max_health
+    direction = 'down'
+    attack0 = Attack_type_NULL(8.3)
+    attack1 = Attack_type_A(8.2)
+    attack2 = Attack_type_B(8.1)
+    attack3 = Attack_type_C(7.9)
+    attack4 = Attack_type_D(8.3)
+
+    attack5 = Attack_type_E(8.15)
+    attack6 = Attack_type_F(8.45)
+    attack7 = Attack_type_G(8.15)
+    attack8 = Attack_type_H(8.15)
+    attack9 = Attack_type_I(8.3)
+    attack10 = Attack_type_J(9.5)
+
+    attack11 = Attack_type_K(13.5)
+    attack12 = Attack_type_L(8.3)
+    attack13 = Attack_type_M(8.3)
+    attack14 = Attack_type_O(7.9)
+
+    attack15 = Attack_type_N(8.2)
+
+    attack_wait = Attack_type_NULL(15.3)
+
+    attack16 = Attack_type_J(9)
+    attack17 = Attack_type_K(8)
+    attack18 = Attack_type_L(6)
+    attack19 = Attack_type_M(4)
+
+    attack20 = Attack_type_O(8)
+    attack21 = Attack_type_N(8.5)
+    attack_wait_2 = Attack_type_NULL(3)
+    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
+    current_attack = "attack0"
+
+    menu()
+    pygame.mixer.music.stop()
+    while running:
+        screen.fill((0,0,0))
+        pygame.draw.rect(screen, WHITE, battle_box, 10)
+        max_hp_bar = pygame.Rect(700, 1015, player.max_health * 2, 40)
+        current_hp_bar = pygame.Rect(700, 1015, player.health * 2, 40)
+        pygame.draw.rect(screen, RED, max_hp_bar)
+        pygame.draw.rect(screen, YELLOW, current_hp_bar)
+
+        hp_display = game_font.render(f"{player.health}/{player.max_health}", True, (255, 255, 255))
+        screen.blit(hp_display, (900, 1008))
+        screen.blit(enemy_image, (600, 200))
+        
+        # event loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            #full screen toggle and make it to scale properly
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_F11:
+                    pygame.display.toggle_fullscreen()
+            #make it so if escape key is held for three seconds it opens main menu
+                if event.key == pygame.K_ESCAPE:
+                    start_time = time.time()
+                    while pygame.key.get_pressed()[pygame.K_ESCAPE]:
+                        current_time = time.time()
+                        if current_time - start_time >= 3:
+                            menu()
+                            pygame.mixer.music.stop()
+                            break
+            # spawn attack on keydown so perform_attack isn't called every frame
+
+        keys = pygame.key.get_pressed()
+        # reset velocities each frame
+        player.changex = 0
+        player.changey = 0
+
+        if player.soul_mode == "Red":
+            if keys[pygame.K_LEFT]:
+                player.changex = -SPEED * 1.5
+                direction = 'left'
+            elif keys[pygame.K_RIGHT]:
+                player.changex = SPEED * 1.5
+                direction = 'right'
+            if keys[pygame.K_UP]:
+                player.changey = -SPEED * 1.5
+                direction = 'up'
+            elif keys[pygame.K_DOWN]:
+                player.changey = SPEED * 1.5
+                direction = 'down'
+
+        elif player.soul_mode == "Orange":
+            # continue moving in last direction unless a new key is pressed
+            # set exactly one axis based on direction and clear the other axis
+            if direction == 'left':
+                player.changex = -SPEED
+            elif direction == 'right':
+                player.changex = SPEED
+            elif direction == 'up':
+                player.changey = -SPEED
+            elif direction == 'down':
+                player.changey = SPEED
+
+            # update direction if the player presses a key (changes movement next frame)
+            if keys[pygame.K_LEFT]:
+                direction = 'left'
+            elif keys[pygame.K_RIGHT]:
+                direction = 'right'
+            if keys[pygame.K_UP]:
+                direction = 'up'
+            elif keys[pygame.K_DOWN]:
+                direction = 'down'
+
+
+        if current_attack == "attack0":
+            if not started["attack0"]:
+                play_bgm_battle()
+                player.soul_mode = "Red"
+                attack0.perform_attack()
+                started["attack0"] = True   
+                
+        elif current_attack == "attack1":
+            if not started["attack1"]:
+                attack1.perform_attack()
+                started["attack1"] = True
+        elif current_attack == "attack2":
+            if not started["attack2"]:
+                attack2.perform_attack()
+                started["attack2"] = True
+        elif current_attack == "attack3":
+            if not started["attack3"]:
+                attack3.perform_attack()
+                started["attack3"] = True
+        elif current_attack == "attack4":
+            if not started["attack4"]:
+                attack4.perform_attack()
+                started["attack4"] = True
+        elif current_attack == "attack5":
+            if not started["attack5"]:
+                attack5.perform_attack()
+                started["attack5"] = True
+        elif current_attack == "attack6":
+            if not started["attack6"]:
+                attack6.perform_attack()
+                started["attack6"] = True
+        elif current_attack == "attack7":
+            if not started["attack7"]:
+                attack7.perform_attack()
+                started["attack7"] = True
+        elif current_attack == "attack8":
+            if not started["attack8"]:
+                attack8.perform_attack()
+                started["attack8"] = True
+        elif current_attack == "attack9":
+            if not started["attack9"]:
+                attack9.perform_attack()
+                started["attack9"] = True
+        elif current_attack == "attack10":
+            if not started["attack10"]:
+                attack10.perform_attack()
+                started["attack10"] = True
+        elif current_attack == "attack11":
+            if not started["attack11"]:
+                attack11.perform_attack()
+                started["attack11"] = True
+        elif current_attack == "attack12":
+            if not started["attack12"]:
+                attack12.perform_attack()
+                started["attack12"] = True
+        elif current_attack == "attack13":
+            if not started["attack13"]:
+                attack13.perform_attack()
+                started["attack13"] = True
+        elif current_attack == "attack14":
+            if not started["attack14"]:
+                attack14.perform_attack()
+                started["attack14"] = True
+        elif current_attack == "attack15":
+            if not started["attack15"]:
+                attack15.perform_attack()
+                started["attack15"] = True
+        elif current_attack == "attack_wait":
+            if not started["attack_wait"]:
+                attack_wait.perform_attack()
+                started["attack_wait"] = True
+        elif current_attack == "attack16":
+            if not started["attack16"]:
+                enemy_image = pygame.image.load(r'resources\ff644481-c0b2-40d9-84a1-d47a51d3bcf4.png')
+                enemy_image = pygame.transform.scale(enemy_image, (350,350))
+                player.health = player.max_health
+                player.soul_mode = "Orange"
+                attack16.perform_attack()
+                started["attack16"] = True
+        elif current_attack == "attack17":
+            if not started["attack17"]:
+                player.soul_mode = "Orange"
+                attack17.perform_attack()
+                started["attack17"] = True
+        elif current_attack == "attack18":
+            if not started["attack18"]:
+                player.soul_mode = "Orange"
+                attack18.perform_attack()
+                started["attack18"] = True
+        elif current_attack == "attack19":
+            if not started["attack19"]:
+                player.soul_mode = "Orange"
+                attack19.perform_attack()
+                started["attack19"] = True
+        elif current_attack == "attack20":
+            if not started["attack20"]:
+                player.soul_mode = "Orange"
+                attack20.perform_attack()
+                started["attack20"] = True
+        elif current_attack == "attack21":
+            # start the final waiting attack only once; do NOT call win_screen immediately
+            if not started.get("attack_wait_2", False):
+                attack_wait_2.perform_attack()
+                started["attack_wait_2"] = True
+                pygame.mixer.music.stop()
+            win_screen()
+        elif current_attack == "none":
+            pass
+                
+            
+
+                    
+
+
+        player.update(move_area)
+        player.player_set()
+        
+
+        cur = None
+        if current_attack == "attack0":
+            cur = attack0
+        elif current_attack == "attack1":
+            cur = attack1
+        elif current_attack == "attack2":
+            cur = attack2
+        elif current_attack == "attack3":
+            cur = attack3
+        elif current_attack == "attack4":
+            cur = attack4
+        elif current_attack == "attack5":
+            cur = attack5
+        elif current_attack == "attack6":
+            cur = attack6
+        elif current_attack == "attack7":
+            cur = attack7
+        elif current_attack == "attack8":
+            cur = attack8
+        elif current_attack == "attack9":
+            cur = attack9
+        elif current_attack == "attack10":
+            cur = attack10
+        elif current_attack == "attack11":
+            cur = attack11
+        elif current_attack == "attack12":
+            cur = attack12
+        elif current_attack == "attack13":
+            cur = attack13
+        elif current_attack == "attack14":
+            cur = attack14
+        elif current_attack == "attack15":
+            cur = attack15
+        elif current_attack == "attack_wait":
+            cur = attack_wait
+        elif current_attack == "attack16":
+            cur = attack16
+        elif current_attack == "attack17":
+            cur = attack17
+        elif current_attack == "attack18":
+            cur = attack18
+        elif current_attack == "attack19":
+            cur = attack19
+        elif current_attack == "attack20":
+            cur = attack20
+        elif current_attack == "attack21":
+            cur = attack21
+        elif current_attack == "attack_wait_2":
+            cur = attack_wait_2
+
+        if cur is not None:
+            finished = (cur.update() == False)
+            if finished:
+                # advance sequence
+                if current_attack == "attack0":
+                    current_attack = "attack1"
+                elif current_attack == "attack1":
+                    current_attack = "attack2"
+                elif current_attack == "attack2":
+                    current_attack = "attack3"
+                elif current_attack == "attack3":
+                    current_attack = "attack4"
+                elif current_attack == "attack4":
+                    current_attack = "attack5"
+                elif current_attack == "attack5":
+                    current_attack = "attack6"
+                elif current_attack == "attack6":
+                    current_attack = "attack7"
+                elif current_attack == "attack7":
+                    current_attack = "attack8"
+                elif current_attack == "attack8":
+                    current_attack = "attack9"
+                elif current_attack == "attack9":
+                    current_attack = "attack10"
+                elif current_attack == "attack10":
+                    current_attack = "attack11"
+                elif current_attack == "attack11":
+                    current_attack = "attack12"
+                elif current_attack == "attack12":
+                    current_attack = "attack13"
+                elif current_attack == "attack13":
+                    current_attack = "attack14"
+                elif current_attack == "attack14":
+                    current_attack = "attack15"
+                elif current_attack == "attack15":
+                    current_attack = "attack_wait"
+                elif current_attack == "attack_wait":
+                    current_attack = "attack16"
+                elif current_attack == "attack16":
+                    current_attack = "attack17"
+                elif current_attack == "attack17":
+                    current_attack = "attack18"
+                elif current_attack == "attack18":
+                    current_attack = "attack19"
+                elif current_attack == "attack19":
+                    current_attack = "attack20"
+                elif current_attack == "attack20":
+                    current_attack = "attack21"
+                elif current_attack == "attack21":
+                    current_attack = "attack_wait_2"
+                elif current_attack == "attack_wait_2":
+                    current_attack = "none"
+        
+        # update and draw bullets from attacks (non-blocking)
+        fight.draw()
+        act.draw()
+        item.draw()
+        mercy.draw()
+        update_bullets(move_area, player)
+        
+
+
+        
+        if invincible:
+            if player.health < player.max_health:
+                player.health = player.max_health
+        if player.health <= 0:
+            pygame.mixer.music.stop()
+            #delete all attacks on screen
+            current_attack = "none"
+            
+            screen.fill((0,0,0))
+            game_over_display = game_over_font.render("GAME OVER", True, (255, 0, 0))
+            screen.blit(game_over_display, (500, 200))
+            game_font_display2 = game_font.render("You have been defeated...Stay Determined", True, (255, 255, 255))
+            screen.blit(game_font_display2, (100, 400))
+            pygame.display.flip()
+            if keys[pygame.K_ESCAPE]:
+                running = False
+            if keys[pygame.K_RETURN]:
+                #delete everything and reset
+                current_attack = "attack0"
+                started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
+                player.health = player.max_health
+                
+
+                
+                
+                
+        pygame.display.flip()
+    
+    pygame.quit()
+        
+        
+
+
+if __name__ == "__main__":
+    main()

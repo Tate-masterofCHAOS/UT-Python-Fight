@@ -207,10 +207,11 @@ def win_screen():
     move_on_display = game_font.render("Press any key to continue...", True, (255, 255, 255))
     screen.blit(move_on_display, (500, 600))
     pygame.display.flip()
-    while running:
+    going = True
+    while going:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                going = False
                 pygame.quit()
 
             if event.type == pygame.KEYDOWN:
@@ -257,8 +258,8 @@ def main():
 
     attack20 = Attack_type_O(8)
     attack21 = Attack_type_N(8.5)
-    attack_wait_2 = Attack_type_NULL(3)
-    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
+    attack_wait_2 = Attack_type_NULL(10)
+    started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": False, "attack_wait_3": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
     current_attack = "attack0"
 
     menu()
@@ -440,11 +441,12 @@ def main():
                 player.soul_mode = "Orange"
                 attack21.perform_attack()
                 started["attack21"] = True
-        elif current_attack == "attack_wait_2":
-            attack_wait_2.perform_attack()
-            started["attack_wait_2"] = True
-            pygame.mixer.music.stop()
-            win_screen()
+        elif current_attack == "attack21":
+            # start the final waiting attack only once; do NOT call win_screen immediately
+            if not started.get("attack_wait_2", False):
+                attack_wait_2.perform_attack()
+                started["attack_wait_2"] = True
+                pygame.mixer.music.stop()
         elif current_attack == "none":
             pass
             
@@ -507,57 +509,65 @@ def main():
             cur = attack_wait_2
 
         if cur is not None:
+            prev_attack = current_attack
             finished = (cur.update() == False)
             if finished:
-                # advance sequence
-                if current_attack == "attack0":
-                    current_attack = "attack1"
-                elif current_attack == "attack1":
-                    current_attack = "attack2"
-                elif current_attack == "attack2":
-                    current_attack = "attack3"
-                elif current_attack == "attack3":
-                    current_attack = "attack4"
-                elif current_attack == "attack4":
-                    current_attack = "attack5"
-                elif current_attack == "attack5":
-                    current_attack = "attack6"
-                elif current_attack == "attack6":
-                    current_attack = "attack7"
-                elif current_attack == "attack7":
-                    current_attack = "attack8"
-                elif current_attack == "attack8":
-                    current_attack = "attack9"
-                elif current_attack == "attack9":
-                    current_attack = "attack10"
-                elif current_attack == "attack10":
-                    current_attack = "attack11"
-                elif current_attack == "attack11":
-                    current_attack = "attack12"
-                elif current_attack == "attack12":
-                    current_attack = "attack13"
-                elif current_attack == "attack13":
-                    current_attack = "attack14"
-                elif current_attack == "attack14":
-                    current_attack = "attack15"
-                elif current_attack == "attack15":
-                    current_attack = "attack_wait"
-                elif current_attack == "attack_wait":
-                    current_attack = "attack16"
-                elif current_attack == "attack16":
-                    current_attack = "attack17"
-                elif current_attack == "attack17":
-                    current_attack = "attack18"
-                elif current_attack == "attack18":
-                    current_attack = "attack19"
-                elif current_attack == "attack19":
-                    current_attack = "attack20"
-                elif current_attack == "attack20":
-                    current_attack = "attack21"
-                elif current_attack == "attack21":
-                    current_attack = "attack_wait_2"
-                elif current_attack == "attack_wait_2":
+                # if the final wait attack just finished, show win screen
+                if prev_attack == "attack_wait_2":
+                    pygame.mixer.music.stop()
+                    win_screen()
+                    # after win_screen returns, halt the sequence
                     current_attack = "none"
+                else:
+                    # advance sequence as before
+                    if current_attack == "attack0":
+                        current_attack = "attack1"
+                    elif current_attack == "attack1":
+                        current_attack = "attack2"
+                    elif current_attack == "attack2":
+                        current_attack = "attack3"
+                    elif current_attack == "attack3":
+                        current_attack = "attack4"
+                    elif current_attack == "attack4":
+                        current_attack = "attack5"
+                    elif current_attack == "attack5":
+                        current_attack = "attack6"
+                    elif current_attack == "attack6":
+                        current_attack = "attack7"
+                    elif current_attack == "attack7":
+                        current_attack = "attack8"
+                    elif current_attack == "attack8":
+                        current_attack = "attack9"
+                    elif current_attack == "attack9":
+                        current_attack = "attack10"
+                    elif current_attack == "attack10":
+                        current_attack = "attack11"
+                    elif current_attack == "attack11":
+                        current_attack = "attack12"
+                    elif current_attack == "attack12":
+                        current_attack = "attack13"
+                    elif current_attack == "attack13":
+                        current_attack = "attack14"
+                    elif current_attack == "attack14":
+                        current_attack = "attack15"
+                    elif current_attack == "attack15":
+                        current_attack = "attack_wait"
+                    elif current_attack == "attack_wait":
+                        current_attack = "attack16"
+                    elif current_attack == "attack16":
+                        current_attack = "attack17"
+                    elif current_attack == "attack17":
+                        current_attack = "attack18"
+                    elif current_attack == "attack18":
+                        current_attack = "attack19"
+                    elif current_attack == "attack19":
+                        current_attack = "attack20"
+                    elif current_attack == "attack20":
+                        current_attack = "attack21"
+                    elif current_attack == "attack21":
+                        current_attack = "attack_wait_2"
+                    elif current_attack == "attack_wait_2":
+                        current_attack = "none"
         
         # update and draw bullets from attacks (non-blocking)
         fight.draw()
@@ -588,7 +598,7 @@ def main():
             if keys[pygame.K_RETURN]:
                 #delete everything and reset
                 current_attack = "attack0"
-                started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": True, "attack_wait_3": True, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
+                started = {"attack0": False, "attack1": False, "attack2": False, "attack3": False, "attack4": False, "attack5": False, "attack6": False, "attack7": False, "attack8": False, "attack9": False, "attack10": False, "attack11": False, "attack12": False, "attack13": False, "attack14": False, "attack15": False, "attack_wait": False, "attack_wait_2": False, "attack_wait_3": False, "attack16": False, "attack17": False, "attack18": False, "attack19": False, "attack20": False, "attack21": False}
                 player.health = player.max_health
                 
 
